@@ -1,6 +1,0 @@
-[submodule "lib/forge-std"]
-	path = lib/forge-std
-	url = https://github.com/foundry-rs/forge-std
-[submodule "Week1-BondingCurves,TokenSecurityIssues/lib/forge-std"]
-	path = Week1-BondingCurves,TokenSecurityIssues/lib/forge-std
-	url = https://github.com/foundry-rs/forge-std
