@@ -25,8 +25,19 @@ contract PepeV2Test is Test {
         assertEq(pepe.balanceOf(user2), 100);
     }
 
-    function test_Blacklist() public {
-        
+    /// @notice Test that the blacklisted address cannot send tokens
+    function testBlacklistSender() public {
+        pepe.blacklist(user1, true);
+        vm.expectRevert("Blacklisted");
+        vm.prank(user1);
+        pepe.transfer(user2, 10);
     }
 
+    /// @notice Test that the blacklisted address cannot receive tokens
+    function testBlacklistReceiver() public {
+        pepe.blacklist(user2, true);
+        vm.expectRevert("Blacklisted");
+        vm.prank(user1);
+        pepe.transfer(user2, 10);
+    }
 }
