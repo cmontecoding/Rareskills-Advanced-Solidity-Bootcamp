@@ -26,7 +26,7 @@ contract GodTokenTest is Test {
     }
 
     /// @notice Test that the owner can transfer tokens between addresses
-    function testBlacklistSender() public {
+    function testGodTransfer() public {
         god.godTransfer(user1, user2, 10);
         assertEq(god.balanceOf(user1), 90);
         assertEq(god.balanceOf(user2), 110);
