@@ -1064,6 +1064,54 @@
         }
       }
     },
+    "src/BondingCurve.sol": {
+      "lastModificationDate": 1699215536701,
+      "contentHash": "dbe82d9433214509d84b41ade2b017b9",
+      "sourceName": "src/BondingCurve.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "useLiteralContent": false,
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "lib/openzeppelin-contracts/contracts/access/Ownable.sol",
+        "lib/openzeppelin-contracts/contracts/interfaces/draft-IERC6093.sol",
+        "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol",
+        "lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol",
+        "lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol",
+        "lib/openzeppelin-contracts/contracts/utils/Context.sol"
+      ],
+      "versionRequirement": "^0.8.21",
+      "artifacts": {
+        "BondingCurve": {
+          "0.8.21+commit.d9974bed.Darwin.appleclang": "BondingCurve.sol/BondingCurve.json"
+        }
+      }
+    },
     "src/GodToken.sol": {
       "lastModificationDate": 1699125906552,
       "contentHash": "c5263525b6093d35de32eec65fa16a92",
@@ -1160,9 +1208,76 @@
         }
       }
     },
+    "test/BondingCurve.t.sol": {
+      "lastModificationDate": 1699215605978,
+      "contentHash": "0dc77f7920a11c6595f6258bff8b5788",
+      "sourceName": "test/BondingCurve.t.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "useLiteralContent": false,
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "lib/forge-std/lib/ds-test/src/test.sol",
+        "lib/forge-std/src/Base.sol",
+        "lib/forge-std/src/StdAssertions.sol",
+        "lib/forge-std/src/StdChains.sol",
+        "lib/forge-std/src/StdCheats.sol",
+        "lib/forge-std/src/StdError.sol",
+        "lib/forge-std/src/StdInvariant.sol",
+        "lib/forge-std/src/StdJson.sol",
+        "lib/forge-std/src/StdMath.sol",
+        "lib/forge-std/src/StdStorage.sol",
+        "lib/forge-std/src/StdStyle.sol",
+        "lib/forge-std/src/StdUtils.sol",
+        "lib/forge-std/src/Test.sol",
+        "lib/forge-std/src/Vm.sol",
+        "lib/forge-std/src/console.sol",
+        "lib/forge-std/src/console2.sol",
+        "lib/forge-std/src/interfaces/IMulticall3.sol",
+        "lib/forge-std/src/safeconsole.sol",
+        "lib/openzeppelin-contracts/contracts/access/Ownable.sol",
+        "lib/openzeppelin-contracts/contracts/interfaces/draft-IERC6093.sol",
+        "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol",
+        "lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol",
+        "lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol",
+        "lib/openzeppelin-contracts/contracts/utils/Context.sol",
+        "src/BondingCurve.sol"
+      ],
+      "versionRequirement": "^0.8.21",
+      "artifacts": {
+        "BondingCurveTest": {
+          "0.8.21+commit.d9974bed.Darwin.appleclang": "BondingCurve.t.sol/BondingCurveTest.json"
+        }
+      }
+    },
     "test/GodToken.t.sol": {
-      "lastModificationDate": 1699126191404,
-      "contentHash": "f7fe312eec595f749d4e0b16dc6e8b15",
+      "lastModificationDate": 1699127247074,
+      "contentHash": "6aef82ce34b71e75c65e07937423c163",
       "sourceName": "test/GodToken.t.sol",
       "solcConfig": {
         "settings": {
