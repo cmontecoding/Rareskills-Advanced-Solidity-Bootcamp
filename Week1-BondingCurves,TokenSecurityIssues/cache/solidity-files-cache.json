@@ -1065,8 +1065,8 @@
       }
     },
     "src/BondingCurve.sol": {
-      "lastModificationDate": 1699215536701,
-      "contentHash": "dbe82d9433214509d84b41ade2b017b9",
+      "lastModificationDate": 1699228041277,
+      "contentHash": "5e4cd3ce4cbd5937381f1e2faa0b43ac",
       "sourceName": "src/BondingCurve.sol",
       "solcConfig": {
         "settings": {
@@ -1098,7 +1098,6 @@
         }
       },
       "imports": [
-        "lib/openzeppelin-contracts/contracts/access/Ownable.sol",
         "lib/openzeppelin-contracts/contracts/interfaces/draft-IERC6093.sol",
         "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol",
         "lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol",
@@ -1208,6 +1207,51 @@
         }
       }
     },
+    "src/UntrustedEscrow.sol": {
+      "lastModificationDate": 1699229780815,
+      "contentHash": "2f83cbb8dd3abd6868e4b3f76b7287cf",
+      "sourceName": "src/UntrustedEscrow.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "useLiteralContent": false,
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "lib/openzeppelin-contracts/contracts/access/Ownable.sol",
+        "lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol",
+        "lib/openzeppelin-contracts/contracts/utils/Context.sol"
+      ],
+      "versionRequirement": "^0.8.21",
+      "artifacts": {
+        "UntrustedEscrow": {
+          "0.8.21+commit.d9974bed.Darwin.appleclang": "UntrustedEscrow.sol/UntrustedEscrow.json"
+        }
+      }
+    },
     "test/BondingCurve.t.sol": {
       "lastModificationDate": 1699215605978,
       "contentHash": "0dc77f7920a11c6595f6258bff8b5788",
@@ -1260,7 +1304,6 @@
         "lib/forge-std/src/console2.sol",
         "lib/forge-std/src/interfaces/IMulticall3.sol",
         "lib/forge-std/src/safeconsole.sol",
-        "lib/openzeppelin-contracts/contracts/access/Ownable.sol",
         "lib/openzeppelin-contracts/contracts/interfaces/draft-IERC6093.sol",
         "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol",
         "lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol",
@@ -1406,6 +1449,76 @@
       "artifacts": {
         "PepeV2Test": {
           "0.8.21+commit.d9974bed.Darwin.appleclang": "PepeV2.t.sol/PepeV2Test.json"
+        }
+      }
+    },
+    "test/UntrustedEscrow.t.sol": {
+      "lastModificationDate": 1699230032300,
+      "contentHash": "b5c7263e95dad88398afd9cfdb1450b2",
+      "sourceName": "test/UntrustedEscrow.t.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "useLiteralContent": false,
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "lib/forge-std/lib/ds-test/src/test.sol",
+        "lib/forge-std/src/Base.sol",
+        "lib/forge-std/src/StdAssertions.sol",
+        "lib/forge-std/src/StdChains.sol",
+        "lib/forge-std/src/StdCheats.sol",
+        "lib/forge-std/src/StdError.sol",
+        "lib/forge-std/src/StdInvariant.sol",
+        "lib/forge-std/src/StdJson.sol",
+        "lib/forge-std/src/StdMath.sol",
+        "lib/forge-std/src/StdStorage.sol",
+        "lib/forge-std/src/StdStyle.sol",
+        "lib/forge-std/src/StdUtils.sol",
+        "lib/forge-std/src/Test.sol",
+        "lib/forge-std/src/Vm.sol",
+        "lib/forge-std/src/console.sol",
+        "lib/forge-std/src/console2.sol",
+        "lib/forge-std/src/interfaces/IMulticall3.sol",
+        "lib/forge-std/src/safeconsole.sol",
+        "lib/openzeppelin-contracts/contracts/access/Ownable.sol",
+        "lib/openzeppelin-contracts/contracts/interfaces/draft-IERC6093.sol",
+        "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol",
+        "lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol",
+        "lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol",
+        "lib/openzeppelin-contracts/contracts/utils/Context.sol",
+        "src/UntrustedEscrow.sol"
+      ],
+      "versionRequirement": "^0.8.21",
+      "artifacts": {
+        "DummyERC20": {
+          "0.8.21+commit.d9974bed.Darwin.appleclang": "UntrustedEscrow.t.sol/DummyERC20.json"
+        },
+        "UntrustedEscrowTest": {
+          "0.8.21+commit.d9974bed.Darwin.appleclang": "UntrustedEscrow.t.sol/UntrustedEscrowTest.json"
         }
       }
     }
