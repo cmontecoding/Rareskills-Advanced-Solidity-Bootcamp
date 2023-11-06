@@ -15,7 +15,7 @@ contract UntrustedEscrowTest is Test {
 
     function setUp() public {
         /// @dev warp forward so that block timestamp is not 0
-        vm.warp(block.timestamp+1000);
+        vm.warp(block.timestamp + 1000);
 
         admin = address(this);
         user1 = address(0x1);
@@ -26,8 +26,7 @@ contract UntrustedEscrowTest is Test {
     }
 
     function testInitialize() public {
-        untrusted.initialize(user1, user2, IERC20(address(token)) 
-        );
+        untrusted.initialize(user1, user2, IERC20(address(token)));
 
         assertEq(untrusted.buyer(), user1);
         assertEq(untrusted.seller(), user2);
@@ -35,8 +34,7 @@ contract UntrustedEscrowTest is Test {
     }
 
     function testDeposit() public {
-        untrusted.initialize(user1, user2, IERC20(address(token)) 
-        );
+        untrusted.initialize(user1, user2, IERC20(address(token)));
 
         vm.startPrank(user1);
         token.approve(address(untrusted), 10);
@@ -49,8 +47,7 @@ contract UntrustedEscrowTest is Test {
     }
 
     function testWithdraw() public {
-        untrusted.initialize(user1, user2, IERC20(address(token)) 
-        );
+        untrusted.initialize(user1, user2, IERC20(address(token)));
 
         vm.startPrank(user1);
         token.approve(address(untrusted), 10);
@@ -67,8 +64,7 @@ contract UntrustedEscrowTest is Test {
     }
 
     function testWithdrawTooSoon() public {
-        untrusted.initialize(user1, user2, IERC20(address(token)) 
-        );
+        untrusted.initialize(user1, user2, IERC20(address(token)));
 
         vm.startPrank(user1);
         token.approve(address(untrusted), 10);
@@ -80,11 +76,11 @@ contract UntrustedEscrowTest is Test {
         vm.expectRevert("Withdrawal time has not arrived yet");
         untrusted.withdraw();
     }
-
 }
 
 contract DummyERC20 is ERC20 {
     constructor(string memory name, string memory symbol) ERC20(name, symbol) {}
+
     function mint(address to, uint256 amount) public {
         _mint(to, amount);
     }

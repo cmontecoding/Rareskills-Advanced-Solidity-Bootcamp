@@ -7,7 +7,6 @@ import {ERC20} from "openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
 ///@notice Token with god mode. A special address is able
 /// to transfer tokens between addresses at will.
 contract GodToken is Ownable, ERC20 {
-
     constructor(
         uint256 _totalSupply
     ) Ownable(msg.sender) ERC20("GodToken", "GODT") {
@@ -22,5 +21,4 @@ contract GodToken is Ownable, ERC20 {
     ) external onlyOwner {
         _transfer(_from, _to, _amount);
     }
-
 }

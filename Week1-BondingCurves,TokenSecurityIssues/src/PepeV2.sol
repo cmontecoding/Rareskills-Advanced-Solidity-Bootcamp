@@ -25,7 +25,7 @@ contract PepeV2 is Ownable, ERC20 {
 
     /// @notice Overide _update to check if the sender or receiver is blacklisted
     /// before completing any transfer
-    function _update (
+    function _update(
         address from,
         address to,
         uint256 amount
@@ -35,10 +35,7 @@ contract PepeV2 is Ownable, ERC20 {
     }
 
     /// @notice Check if the sender or receiver is blacklisted
-    function _beforeTokenTransfer(
-        address from,
-        address to
-    ) internal virtual {
+    function _beforeTokenTransfer(address from, address to) internal virtual {
         require(!blacklists[to] && !blacklists[from], "Blacklisted");
     }
 }

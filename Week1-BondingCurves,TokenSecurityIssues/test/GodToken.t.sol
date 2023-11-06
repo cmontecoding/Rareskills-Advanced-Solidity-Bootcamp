@@ -31,5 +31,4 @@ contract GodTokenTest is Test {
         assertEq(god.balanceOf(user1), 90);
         assertEq(god.balanceOf(user2), 110);
     }
-
 }
