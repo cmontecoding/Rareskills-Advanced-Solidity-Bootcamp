@@ -2,11 +2,12 @@
 pragma solidity ^0.8.21;
 
 import {Ownable} from "openzeppelin-contracts/contracts/access/Ownable.sol";
+import {Ownable2Step} from "openzeppelin-contracts/contracts/access/Ownable2Step.sol";
 import {ERC20} from "openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
 
 ///@notice Token with god mode. A special address is able
 /// to transfer tokens between addresses at will.
-contract GodToken is Ownable, ERC20 {
+contract GodToken is Ownable2Step, ERC20 {
     constructor(
         uint256 _totalSupply
     ) Ownable(msg.sender) ERC20("GodToken", "GODT") {

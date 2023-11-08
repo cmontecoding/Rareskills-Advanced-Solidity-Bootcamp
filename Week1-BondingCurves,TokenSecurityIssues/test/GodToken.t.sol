@@ -31,4 +31,25 @@ contract GodTokenTest is Test {
         assertEq(god.balanceOf(user1), 90);
         assertEq(god.balanceOf(user2), 110);
     }
+
+    /// @notice Test that non-owners cannot transfer tokens between addresses
+    function testGodTransferFail() public {
+        vm.prank(user1);
+        vm.expectRevert();
+        god.godTransfer(user1, user2, 10);
+    }
+
+    function testOwnable2StepTransfer() public {
+        god.transferOwnership(user1);
+
+        /// @dev user1 should be pending owner
+        assertEq(god.pendingOwner(), user1);
+        assertEq(god.owner(), admin);
+
+        vm.prank(user1);
+        god.acceptOwnership();
+        assertEq(god.owner(), user1);
+        assertEq(god.pendingOwner(), address(0));
+    }
+
 }
