@@ -29,13 +29,13 @@ contract PepeV2 is Ownable, ERC20 {
         address from,
         address to,
         uint256 amount
-    ) internal virtual override {
+    ) internal override {
         _beforeTokenTransfer(from, to);
         super._update(from, to, amount);
     }
 
     /// @notice Check if the sender or receiver is blacklisted
-    function _beforeTokenTransfer(address from, address to) internal virtual {
+    function _beforeTokenTransfer(address from, address to) internal view {
         require(!blacklists[to] && !blacklists[from], "Blacklisted");
     }
 }
