@@ -62,7 +62,8 @@ contract BondingCurve is ERC20 {
 
         _burn(msg.sender, _tokensToSell);
 
-        payable(msg.sender).transfer(price);
+        (bool success, ) = payable(msg.sender).call{value: price}("");
+        require(success, "Transfer failed");
         emit TokensSold(msg.sender, _tokensToSell, price, totalSupply());
     }
 
@@ -100,7 +101,8 @@ contract BondingCurve is ERC20 {
     }
 
     function withdrawFunds() external onlyOwner {
-        payable(owner).transfer(address(this).balance);
+        (bool success, ) = payable(owner).call{value: address(this).balance}("");
+        require(success, "Transfer failed");
     }
 
     function setMaxGasLimit(uint256 _newLimit) external onlyOwner {

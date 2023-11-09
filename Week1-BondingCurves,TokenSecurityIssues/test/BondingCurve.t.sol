@@ -55,7 +55,7 @@ contract BondingCurveTest is Test {
         vm.prank(user1);
         bond.purchaseTokens{value: 3, gas: 150000}(1);
 
-        /// @dev first person who bought sells and makes a profit
+        /// @dev first person who bought, sells and makes a profit
         bond.sellTokens(1);
         assertEq(bond.balanceOf(address(this)), 0);
         assertEq(address(this).balance, 1002);
