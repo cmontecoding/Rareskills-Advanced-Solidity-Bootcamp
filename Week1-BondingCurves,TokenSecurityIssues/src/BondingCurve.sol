@@ -8,8 +8,8 @@ import {ERC20} from "openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
 /// To keep things simple, use a linear bonding curve.
 contract BondingCurve is ERC20 {
     address public owner;
-    uint256 public initialPrice;
-    uint256 public slope;
+    uint256 public immutable initialPrice;
+    uint256 public immutable slope;
     uint256 public supply;
     uint256 public buybackPool;
     uint256 public totalFundsRaised;
