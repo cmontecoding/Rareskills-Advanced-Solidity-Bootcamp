@@ -1236,8 +1236,8 @@
       }
     },
     "src/BondingCurve.sol": {
-      "lastModificationDate": 1699542014308,
-      "contentHash": "a96a68805ad3d69a135233244c2861f0",
+      "lastModificationDate": 1699543356629,
+      "contentHash": "1e0867c10d718752538c18a4031d30a9",
       "sourceName": "src/BondingCurve.sol",
       "solcConfig": {
         "settings": {
@@ -1430,8 +1430,8 @@
       }
     },
     "test/BondingCurve.t.sol": {
-      "lastModificationDate": 1699230165586,
-      "contentHash": "324a6fb99c399e041745b7d259aa7ade",
+      "lastModificationDate": 1699543200328,
+      "contentHash": "1efd794122c24d559a490018d0a0b133",
       "sourceName": "test/BondingCurve.t.sol",
       "solcConfig": {
         "settings": {

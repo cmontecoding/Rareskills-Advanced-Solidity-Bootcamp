@@ -10,12 +10,7 @@ contract BondingCurve is ERC20 {
     address public owner;
     uint256 public immutable initialPrice;
     uint256 public immutable slope;
-    uint256 public supply;
-    uint256 public buybackPool;
-    uint256 public totalFundsRaised;
     uint256 public maxGasLimit = 160_000;
-
-    mapping(address => uint256) public balances;
 
     event TokensPurchased(
         address indexed buyer,
@@ -34,9 +29,6 @@ contract BondingCurve is ERC20 {
         owner = msg.sender;
         initialPrice = _initialPrice;
         slope = _slope;
-        supply = 0;
-        buybackPool = 0;
-        totalFundsRaised = 0;
     }
 
     modifier onlyOwner() {
@@ -58,42 +50,34 @@ contract BondingCurve is ERC20 {
         uint256 price = calculatePurchasePrice(_tokensToBuy);
         require(msg.value >= price, "Insufficient payment");
 
-        supply = supply + _tokensToBuy;
-        balances[msg.sender] = balances[msg.sender] + _tokensToBuy;
-        totalFundsRaised = totalFundsRaised + price;
-
         _mint(msg.sender, _tokensToBuy);
 
-        emit TokensPurchased(msg.sender, _tokensToBuy, price, supply);
+        emit TokensPurchased(msg.sender, _tokensToBuy, price, totalSupply());
     }
 
     function sellTokens(uint256 _tokensToSell) external {
         require(_tokensToSell > 0, "Invalid token amount");
-        require(balances[msg.sender] >= _tokensToSell, "Insufficient balance");
 
         uint256 price = calculateSalePrice(_tokensToSell);
-        supply = supply - _tokensToSell;
-        balances[msg.sender] = balances[msg.sender] - _tokensToSell;
-        totalFundsRaised = totalFundsRaised - price;
 
         _burn(msg.sender, _tokensToSell);
 
         payable(msg.sender).transfer(price);
-        emit TokensSold(msg.sender, _tokensToSell, price, supply);
+        emit TokensSold(msg.sender, _tokensToSell, price, totalSupply());
     }
 
     function calculatePurchasePrice(
         uint256 _tokensToBuy
     ) public view returns (uint256) {
-        uint256 newSupply = supply + _tokensToBuy;
-        return calculatePriceForSupply(supply, newSupply);
+        uint256 newSupply = totalSupply() + _tokensToBuy;
+        return calculatePriceForSupply(totalSupply(), newSupply);
     }
 
     function calculateSalePrice(
         uint256 _tokensToSell
     ) public view returns (uint256) {
-        uint256 newSupply = supply - _tokensToSell;
-        return calculatePriceForSupply(newSupply, supply);
+        uint256 newSupply = totalSupply() - _tokensToSell;
+        return calculatePriceForSupply(newSupply, totalSupply());
     }
 
     /// @notice calculate the price of tokens given the supply

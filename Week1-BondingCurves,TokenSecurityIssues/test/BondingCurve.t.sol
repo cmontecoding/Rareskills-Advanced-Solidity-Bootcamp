@@ -27,7 +27,6 @@ contract BondingCurveTest is Test {
 
         bond.purchaseTokens{value: 1, gas: 150000}(1);
         assertEq(bond.balanceOf(address(this)), 1);
-        assertEq(bond.balances(address(this)), 1);
         assertEq(address(this).balance, 999);
 
         /// @dev sell and get money back
@@ -39,7 +38,6 @@ contract BondingCurveTest is Test {
     function testBuyThree() public {
         bond.purchaseTokens{value: 9, gas: 150000}(3);
         assertEq(bond.balanceOf(address(this)), 3);
-        assertEq(bond.balances(address(this)), 3);
     }
 
     /// @notice make sure price increases with each token
@@ -48,7 +46,6 @@ contract BondingCurveTest is Test {
         bond.purchaseTokens{value: 3, gas: 150000}(1);
         bond.purchaseTokens{value: 5, gas: 150000}(1);
         assertEq(bond.balanceOf(address(this)), 3);
-        assertEq(bond.balances(address(this)), 3);
     }
 
     function testSell() public {
@@ -61,7 +58,6 @@ contract BondingCurveTest is Test {
         /// @dev first person who bought sells and makes a profit
         bond.sellTokens(1);
         assertEq(bond.balanceOf(address(this)), 0);
-        assertEq(bond.balances(address(this)), 0);
         assertEq(address(this).balance, 1002);
     }
 
