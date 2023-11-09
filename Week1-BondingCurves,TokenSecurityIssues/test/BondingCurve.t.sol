@@ -61,8 +61,4 @@ contract BondingCurveTest is Test {
         assertEq(address(this).balance, 1002);
     }
 
-    function testOutsideGasLimit() public {
-        vm.expectRevert("Gas limit exceeded");
-        bond.purchaseTokens{value: 1, gas: 165000}(1);
-    }
 }

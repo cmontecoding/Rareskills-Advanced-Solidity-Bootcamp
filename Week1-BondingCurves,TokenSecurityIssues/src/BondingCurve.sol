@@ -10,7 +10,7 @@ import {ERC20} from "openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
 contract BondingCurve is ERC20, Ownable2Step {
     uint256 public immutable initialPrice;
     uint256 public immutable slope;
-    uint256 public maxGasLimit = 160_000;
+    uint256 public maxGasPrice = 105_000;
 
     event TokensPurchased(
         address indexed buyer,
@@ -30,16 +30,16 @@ contract BondingCurve is ERC20, Ownable2Step {
         slope = _slope;
     }
 
-    /// @dev Modifier to check the gas limit
+    /// @dev Modifier to throttle the gas used
     /// (to prevent sandwhich attacks)
-    modifier withinGasLimit() {
-        require(gasleft() <= maxGasLimit, "Gas limit exceeded");
+    modifier throttleGas() {
+        require(tx.gasprice <= maxGasPrice, "Gas price exceeded");
         _;
     }
 
     function purchaseTokens(
         uint256 _tokensToBuy
-    ) external payable withinGasLimit {
+    ) external payable throttleGas {
         require(_tokensToBuy > 0, "Invalid token amount");
         uint256 price = calculatePurchasePrice(_tokensToBuy);
         require(msg.value >= price, "Insufficient payment");
@@ -99,7 +99,7 @@ contract BondingCurve is ERC20, Ownable2Step {
         require(success, "Transfer failed");
     }
 
-    function setMaxGasLimit(uint256 _newLimit) external onlyOwner {
-        maxGasLimit = _newLimit;
+    function setMaxGasPrice(uint256 _newPrice) external onlyOwner {
+        maxGasPrice = _newPrice;
     }
 }
