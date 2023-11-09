@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.21;
 
-import {Ownable} from "openzeppelin-contracts/contracts/access/Ownable.sol";
+import {Ownable2Step, Ownable} from "openzeppelin-contracts/contracts/access/Ownable2Step.sol";
 import {ERC20} from "openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
 
 ///@notice Token with sanctions. Create a fungible token that
 /// allows an admin to ban specified addresses from sending and receiving tokens.
-contract PepeV2 is Ownable, ERC20 {
+contract PepeV2 is Ownable2Step, ERC20 {
     mapping(address => bool) public blacklists;
 
     constructor(

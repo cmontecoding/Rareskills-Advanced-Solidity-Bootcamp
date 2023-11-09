@@ -3,14 +3,14 @@ pragma solidity 0.8.21;
 
 import {IERC20} from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
-import {Ownable} from "openzeppelin-contracts/contracts/access/Ownable.sol";
+import {Ownable2Step, Ownable} from "openzeppelin-contracts/contracts/access/Ownable2Step.sol";
 
 ///@notice Untrusted escrow. Create a contract where a buyer can put an arbitrary
 /// ERC20 token into a contract and a seller can withdraw it 3 days later.
 /// Based on your readings above, what issues do you need to defend against?
 /// Create the safest version of this that you can while guarding against issues that you cannot control.
 /// Does your contract handle fee-on transfer tokens or non-standard ERC20 tokens.
-contract UntrustedEscrow is Ownable {
+contract UntrustedEscrow is Ownable2Step {
     using SafeERC20 for IERC20;
 
     address public buyer;
