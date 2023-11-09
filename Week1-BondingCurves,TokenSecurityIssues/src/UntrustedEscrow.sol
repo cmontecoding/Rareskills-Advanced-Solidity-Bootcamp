@@ -2,6 +2,7 @@
 pragma solidity ^0.8.21;
 
 import {IERC20} from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
 import {Ownable} from "openzeppelin-contracts/contracts/access/Ownable.sol";
 
 ///@notice Untrusted escrow. Create a contract where a buyer can put an arbitrary
@@ -10,6 +11,8 @@ import {Ownable} from "openzeppelin-contracts/contracts/access/Ownable.sol";
 /// Create the safest version of this that you can while guarding against issues that you cannot control.
 /// Does your contract handle fee-on transfer tokens or non-standard ERC20 tokens.
 contract UntrustedEscrow is Ownable {
+    using SafeERC20 for IERC20;
+
     address public buyer;
     address public seller;
     IERC20 public token;
@@ -36,11 +39,7 @@ contract UntrustedEscrow is Ownable {
         deposited = true;
         depositTime = block.timestamp;
 
-        /// @dev require the transferFrom to make sure the transaction went through
-        require(
-            token.transferFrom(buyer, address(this), amount),
-            "Token transfer failed"
-        );
+        token.safeTransferFrom(buyer, address(this), amount);
     }
 
     function withdraw() external {
@@ -52,8 +51,7 @@ contract UntrustedEscrow is Ownable {
         );
         uint256 balance = token.balanceOf(address(this));
 
-        /// @dev require the transfer to make sure the transaction went through
-        require(token.transfer(seller, balance), "Token transfer failed");
+        token.safeTransfer(seller, balance);
     }
 
     /// @notice The Owner can recover the ERC20 token that was deposited
@@ -65,6 +63,6 @@ contract UntrustedEscrow is Ownable {
             tokenAddress != address(token),
             "Cannot recover the deposited token"
         );
-        IERC20(tokenAddress).transfer(owner(), amount);
+        IERC20(tokenAddress).safeTransfer(owner(), amount);
     }
 }
