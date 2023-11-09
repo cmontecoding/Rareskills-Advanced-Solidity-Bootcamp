@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.21;
 
+import {Ownable2Step, Ownable} from "openzeppelin-contracts/contracts/access/Ownable2Step.sol";
 import {ERC20} from "openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
 
 ///@notice Token sale and buyback with bonding curve.
 /// The more tokens a user buys, the more expensive the token becomes.
 /// To keep things simple, use a linear bonding curve.
-contract BondingCurve is ERC20 {
-    address public owner;
+contract BondingCurve is ERC20, Ownable2Step {
     uint256 public immutable initialPrice;
     uint256 public immutable slope;
     uint256 public maxGasLimit = 160_000;
@@ -25,15 +25,9 @@ contract BondingCurve is ERC20 {
         uint256 newSupply
     );
 
-    constructor(uint256 _initialPrice, uint256 _slope) ERC20("Bond", "BOND") {
-        owner = msg.sender;
+    constructor(uint256 _initialPrice, uint256 _slope) Ownable(msg.sender) ERC20("Bond", "BOND") {
         initialPrice = _initialPrice;
         slope = _slope;
-    }
-
-    modifier onlyOwner() {
-        require(msg.sender == owner, "Only the owner can call this function");
-        _;
     }
 
     /// @dev Modifier to check the gas limit
@@ -101,7 +95,7 @@ contract BondingCurve is ERC20 {
     }
 
     function withdrawFunds() external onlyOwner {
-        (bool success, ) = payable(owner).call{value: address(this).balance}("");
+        (bool success, ) = payable(owner()).call{value: address(this).balance}("");
         require(success, "Transfer failed");
     }
 
