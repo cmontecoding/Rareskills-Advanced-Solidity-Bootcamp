@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.21;
+pragma solidity 0.8.21;
 
 import {Ownable} from "openzeppelin-contracts/contracts/access/Ownable.sol";
 import {Ownable2Step} from "openzeppelin-contracts/contracts/access/Ownable2Step.sol";

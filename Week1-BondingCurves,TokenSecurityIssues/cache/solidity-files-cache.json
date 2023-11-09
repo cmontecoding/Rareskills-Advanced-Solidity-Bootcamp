@@ -1236,8 +1236,8 @@
       }
     },
     "src/BondingCurve.sol": {
-      "lastModificationDate": 1699230173916,
-      "contentHash": "2bf892316b3fc0dd765dc98e430f5682",
+      "lastModificationDate": 1699539870995,
+      "contentHash": "1228efa725c3de34aeef5f96e478b709",
       "sourceName": "src/BondingCurve.sol",
       "solcConfig": {
         "settings": {
@@ -1275,7 +1275,7 @@
         "lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol",
         "lib/openzeppelin-contracts/contracts/utils/Context.sol"
       ],
-      "versionRequirement": "^0.8.21",
+      "versionRequirement": "=0.8.21",
       "artifacts": {
         "BondingCurve": {
           "0.8.21+commit.d9974bed.Darwin.appleclang": "BondingCurve.sol/BondingCurve.json"
@@ -1283,8 +1283,8 @@
       }
     },
     "src/GodToken.sol": {
-      "lastModificationDate": 1699386415085,
-      "contentHash": "78fde96728c60ca6ecdfcbc586a50744",
+      "lastModificationDate": 1699539850983,
+      "contentHash": "551c19ff482d48467e398d555516119c",
       "sourceName": "src/GodToken.sol",
       "solcConfig": {
         "settings": {
@@ -1324,7 +1324,7 @@
         "lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol",
         "lib/openzeppelin-contracts/contracts/utils/Context.sol"
       ],
-      "versionRequirement": "^0.8.21",
+      "versionRequirement": "=0.8.21",
       "artifacts": {
         "GodToken": {
           "0.8.21+commit.d9974bed.Darwin.appleclang": "GodToken.sol/GodToken.json"
@@ -1332,8 +1332,8 @@
       }
     },
     "src/PepeV2.sol": {
-      "lastModificationDate": 1699230169953,
-      "contentHash": "4930b240c6f66ee5dbc67e0b8e942e8f",
+      "lastModificationDate": 1699539867699,
+      "contentHash": "ef935f191bc4871c60e550da76c1c159",
       "sourceName": "src/PepeV2.sol",
       "solcConfig": {
         "settings": {
@@ -1372,7 +1372,7 @@
         "lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol",
         "lib/openzeppelin-contracts/contracts/utils/Context.sol"
       ],
-      "versionRequirement": "^0.8.21",
+      "versionRequirement": "=0.8.21",
       "artifacts": {
         "PepeV2": {
           "0.8.21+commit.d9974bed.Darwin.appleclang": "PepeV2.sol/PepeV2.json"
@@ -1380,8 +1380,8 @@
       }
     },
     "src/UntrustedEscrow.sol": {
-      "lastModificationDate": 1699497712427,
-      "contentHash": "b776af585abbaa46a9ac5f9052bc36ea",
+      "lastModificationDate": 1699539874321,
+      "contentHash": "a2213ad784f17461e2c2817397171c0f",
       "sourceName": "src/UntrustedEscrow.sol",
       "solcConfig": {
         "settings": {
@@ -1420,7 +1420,7 @@
         "lib/openzeppelin-contracts/contracts/utils/Address.sol",
         "lib/openzeppelin-contracts/contracts/utils/Context.sol"
       ],
-      "versionRequirement": "^0.8.21",
+      "versionRequirement": "=0.8.21",
       "artifacts": {
         "UntrustedEscrow": {
           "0.8.21+commit.d9974bed.Darwin.appleclang": "UntrustedEscrow.sol/UntrustedEscrow.json"
