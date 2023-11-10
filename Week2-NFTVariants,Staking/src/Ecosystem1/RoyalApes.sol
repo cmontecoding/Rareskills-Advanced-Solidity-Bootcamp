@@ -11,12 +11,24 @@ import {MerkleProof} from "openzeppelin-contracts/contracts/utils/cryptography/M
 /// @dev Using ERC721Royalty instead of 721 and 2981 separately because this combines them neatly
 contract RoyalApes is Ownable2Step, ERC721Royalty {
 
+    uint256 public currentSupply;
+    uint256 public constant MAX_SUPPLY = 1000;
+
     constructor(
         address _owner
     ) Ownable(_owner) ERC721("RoyalApes", "RYAP") {}
 
-    function mint() public {
+    function mint() public payable {
+        require(currentSupply < MAX_SUPPLY, "Max supply reached");
+        require(msg.value >= 1 ether, "Not enough ETH");
 
+        currentSupply++;
+        _safeMint(msg.sender, currentSupply);
+
+        /// @dev return the excess ETH
+        // does this allow double spending? if they spend in _safeMint and then again here?
+        (bool success, ) = payable(msg.sender).call{value: msg.value - 1 ether}("");
+        require(success, "Refund transfer failed");
     }
 
     /// @notice Addresses in a merkle tree can mint at a discount
@@ -25,6 +37,7 @@ contract RoyalApes is Ownable2Step, ERC721Royalty {
     }
 
     function withdrawFundsRaised() public onlyOwner {
-        
+        (bool success, ) = payable(owner()).call{value: address(this).balance}("");
+        require(success, "Transfer failed");
     }
 }
