@@ -1,0 +1,1 @@
+//on ierc721 received {start staking process or at least record it}
