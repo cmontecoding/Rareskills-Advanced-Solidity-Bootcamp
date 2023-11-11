@@ -25,6 +25,7 @@ contract RoyalApes is Ownable2Step, ERC721Royalty {
         bytes32 _merkleRoot
     ) Ownable(_owner) ERC721("RoyalApes", "RYAP") {
         merkleRoot = _merkleRoot;
+        _setDefaultRoyalty(_owner, 250);
     }
 
     function mint() public payable {
