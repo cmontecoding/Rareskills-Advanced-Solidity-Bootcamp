@@ -10,7 +10,7 @@ contract StakingToken is Ownable2Step, ERC20 {
         address _stakingSystem
     ) Ownable(_stakingSystem) ERC20("StakingToken", "STKN") {}
 
-    function mint(uint256 _amount) external onlyOwner {
-        _mint(msg.sender, _amount);
+    function mint(address to, uint256 _amount) external onlyOwner {
+        _mint(to, _amount);
     }
 }
