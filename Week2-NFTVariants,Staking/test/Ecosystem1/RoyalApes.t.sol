@@ -68,6 +68,22 @@ contract RoyalApesTest is Test {
         assertEq(royalApes.balanceOf(user1), 1);
     }
 
+    function testMintWithDiscountWrongAmount() public {
+        bytes32[] memory proof = new bytes32[](1);
+        proof[0] = merkleTree[2];
+        vm.prank(user1);
+        vm.expectRevert("Not right amount of ETH");
+        royalApes.mintWithDiscount{value: .51 ether}(0, user1, proof);
+    }
+
+    function testMintWithDiscountWrongAmount2() public {
+        bytes32[] memory proof = new bytes32[](1);
+        proof[0] = merkleTree[2];
+        vm.prank(user1);
+        vm.expectRevert("Not right amount of ETH");
+        royalApes.mintWithDiscount{value: .49 ether}(0, user1, proof);
+    }
+
     /// @dev test that my merkle tree theories in setup are correct
     function testMerkleTree() public {
         /// @dev make sure leaves are correct
