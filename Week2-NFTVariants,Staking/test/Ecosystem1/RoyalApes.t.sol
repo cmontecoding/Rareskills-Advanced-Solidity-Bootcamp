@@ -21,9 +21,6 @@ contract RoyalApesTest is Test {
         /// tree with 2 leaves and 2 levels
         merkleTree = new bytes32[](3);
         uint256 index = 0;
-        // merkleTree[1] = keccak256(abi.encodePacked(index++, user1));
-        // merkleTree[2] = keccak256(abi.encodePacked(index++, user2));
-        // merkleTree[0] = keccak256(abi.encodePacked(merkleTree[1], merkleTree[2]));
         merkleTree[1] = keccak256(abi.encode(index++, user1));
         merkleTree[2] = keccak256(abi.encode(index++, user2));
         merkleTree[0] = keccak256(abi.encode(merkleTree[1], merkleTree[2]));
