@@ -18,13 +18,13 @@ contract StakingTokenTest is Test {
     }
 
     function testCanMint() public {
-        token.mint(10);
+        token.mint(admin, 10);
+        assertEq(token.balanceOf(admin), 10);
     }
 
     function testCannotMint() public {
         vm.prank(user1);
         vm.expectRevert();
-        token.mint(10);
+        token.mint(user1, 10);
     }
-
 }

@@ -126,5 +126,4 @@ contract RoyalApesTest is Test {
         proof2[0] = merkleTree[2];
         assertTrue(MerkleProof.verify(proof2, merkleTree[0], merkleTree[1]));
     }
-
 }
