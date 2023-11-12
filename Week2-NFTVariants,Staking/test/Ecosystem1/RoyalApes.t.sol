@@ -76,8 +76,18 @@ contract RoyalApesTest is Test {
         assertEq(royalApes.balanceOf(user1), 1);
 
         vm.prank(user1);
+        /// @dev reverts due to AlreadyMintedAtDiscount();
         vm.expectRevert();
         royalApes.mintWithDiscount{value: .5 ether}(0, user1, proof);
+    }
+
+    function testMintWithDiscountCantMintDifferentIndex() public {
+        bytes32[] memory proof = new bytes32[](1);
+        proof[0] = merkleTree[2];
+        vm.prank(user1);
+        /// @dev reverts due to InvalidProof();
+        vm.expectRevert();
+        royalApes.mintWithDiscount{value: .5 ether}(1, user1, proof);
     }
 
     function testMintWithDiscountWrongAmount() public {
