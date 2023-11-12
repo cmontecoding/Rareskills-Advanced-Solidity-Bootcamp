@@ -55,7 +55,7 @@ contract RoyalApes is Ownable2Step, ERC721Royalty {
         if (BitMaps.get(bitMap, index)) revert AlreadyMintedAtDiscount();
 
         // Verify the merkle proof.
-        bytes32 node = keccak256(abi.encodePacked(index, account));
+        bytes32 node = keccak256(abi.encode(index, account));
         if (!MerkleProof.verify(merkleProof, merkleRoot, node))
             revert InvalidProof();
 
