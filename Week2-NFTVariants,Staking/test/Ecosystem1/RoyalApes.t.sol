@@ -68,6 +68,18 @@ contract RoyalApesTest is Test {
         assertEq(royalApes.balanceOf(user1), 1);
     }
 
+    function testMintWithDiscountAlreadyClaimed() public {
+        bytes32[] memory proof = new bytes32[](1);
+        proof[0] = merkleTree[2];
+        vm.prank(user1);
+        royalApes.mintWithDiscount{value: .5 ether}(0, user1, proof);
+        assertEq(royalApes.balanceOf(user1), 1);
+
+        vm.prank(user1);
+        vm.expectRevert();
+        royalApes.mintWithDiscount{value: .5 ether}(0, user1, proof);
+    }
+
     function testMintWithDiscountWrongAmount() public {
         bytes32[] memory proof = new bytes32[](1);
         proof[0] = merkleTree[2];
