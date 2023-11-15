@@ -1,3 +1,6 @@
 [submodule "Week2-NFTVariants,Staking/lib/forge-std"]
 	path = Week2-NFTVariants,Staking/lib/forge-std
 	url = https://github.com/foundry-rs/forge-std
+[submodule "Week3-5-Uniswap/lib/forge-std"]
+	path = Week3-5-Uniswap/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
