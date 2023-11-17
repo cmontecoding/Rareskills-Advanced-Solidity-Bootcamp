@@ -43,18 +43,14 @@ contract RoyalApesTest is Test {
 
     function testMintNotEnoughETH() public {
         vm.prank(user1);
-        vm.expectRevert("Not enough ETH");
+        vm.expectRevert("Not right amount of ETH");
         royalApes.mint{value: .99 ether}();
     }
 
     function testMintWithExcessSent() public {
         vm.prank(user1);
+        vm.expectRevert("Not right amount of ETH");
         royalApes.mint{value: 1.5 ether}();
-        assertEq(royalApes.balanceOf(user1), 1);
-
-        // excess ETH should be returned
-        uint256 balance = user1.balance;
-        assertEq(balance, 9 ether);
     }
 
     function testMintWithDiscount() public {

@@ -30,17 +30,10 @@ contract RoyalApes is Ownable2Step, ERC721Royalty {
 
     function mint() public payable {
         require(currentSupply < MAX_SUPPLY, "Max supply reached");
-        require(msg.value >= 1 ether, "Not enough ETH");
+        require(msg.value == 1 ether, "Not right amount of ETH");
 
         currentSupply++;
         _safeMint(msg.sender, currentSupply);
-
-        /// @dev return the excess ETH
-        // does this allow double spending? if they spend in _safeMint and then again here?
-        (bool success, ) = payable(msg.sender).call{value: msg.value - 1 ether}(
-            ""
-        );
-        require(success, "Refund transfer failed");
     }
 
     /// @notice Addresses in a merkle tree can mint at a discount. Only once though
