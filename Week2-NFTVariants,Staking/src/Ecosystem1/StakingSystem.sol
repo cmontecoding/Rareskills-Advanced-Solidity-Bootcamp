@@ -7,7 +7,7 @@ import {StakingToken} from "./StakingToken.sol";
 
 /// @notice Staking System contract for Royal Apes NFTs
 /// @notice Users can stake a Royal Ape and receive
-/// 10 StakingToken per 24 hours.
+/// 10 * 10e18 StakingToken per 24 hours.
 /// @notice Users can withdraw their NFT anytime
 /// @dev The contract takes possesion of the NFT (escrow)
 contract StakingSystem is IERC721Receiver {
@@ -30,14 +30,13 @@ contract StakingSystem is IERC721Receiver {
         stakingToken = StakingToken(_stakingTokenAddress);
     }
 
-    function stake(uint256 tokenId) public {
-        require(isStaked[msg.sender] == false, "You already have a staked Ape");
-        stakedApeOwner[tokenId] = msg.sender;
-        isStaked[msg.sender] = true;
+    function stake(address from, uint256 tokenId) internal {
+        require(isStaked[from] == false, "You already have a staked Ape");
+        stakedApeOwner[tokenId] = from;
+        isStaked[from] = true;
         /// @dev set last claimed time to now
         /// to prevent users from claiming immediately
-        lastClaimedTime[msg.sender] = block.timestamp;
-        royalApes.safeTransferFrom(msg.sender, address(this), tokenId);
+        lastClaimedTime[from] = block.timestamp;
     }
 
     function unstake(uint256 tokenId) public {
@@ -62,10 +61,11 @@ contract StakingSystem is IERC721Receiver {
 
     function onERC721Received(
         address,
-        address,
-        uint256,
+        address from,
+        uint256 tokenId,
         bytes calldata
-    ) external pure returns (bytes4) {
+    ) external returns (bytes4) {
+        stake(from, tokenId);
         return IERC721Receiver.onERC721Received.selector;
     }
 }

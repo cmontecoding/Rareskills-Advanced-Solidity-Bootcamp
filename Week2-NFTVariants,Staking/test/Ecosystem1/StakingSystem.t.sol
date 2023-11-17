@@ -37,7 +37,7 @@ contract StakingSystemTest is Test {
         vm.startPrank(user1);
         royalApes.mint{value: 1 ether}();
         royalApes.approve(address(stakingSystem), 1);
-        stakingSystem.stake(1);
+        royalApes.safeTransferFrom(user1, address(stakingSystem), 1);
 
         assertTrue(stakingSystem.isStaked(user1));
         assertTrue(stakingSystem.stakedApeOwner(1) == user1);
@@ -49,18 +49,15 @@ contract StakingSystemTest is Test {
         vm.startPrank(user1);
         royalApes.mint{value: 1 ether}();
         royalApes.mint{value: 1 ether}();
-        royalApes.approve(address(stakingSystem), 1);
-        stakingSystem.stake(1);
-        royalApes.approve(address(stakingSystem), 2);
+        royalApes.safeTransferFrom(user1, address(stakingSystem), 1);
         vm.expectRevert("You already have a staked Ape");
-        stakingSystem.stake(2);
+        royalApes.safeTransferFrom(user1, address(stakingSystem), 2);
     }
 
     function testUnstake() public {
         vm.startPrank(user1);
         royalApes.mint{value: 1 ether}();
-        royalApes.approve(address(stakingSystem), 1);
-        stakingSystem.stake(1);
+        royalApes.safeTransferFrom(user1, address(stakingSystem), 1);
         stakingSystem.unstake(1);
 
         assertTrue(stakingSystem.isStaked(user1) == false);
@@ -72,8 +69,7 @@ contract StakingSystemTest is Test {
     function testWithdrawTokens() public {
         vm.startPrank(user1);
         royalApes.mint{value: 1 ether}();
-        royalApes.approve(address(stakingSystem), 1);
-        stakingSystem.stake(1);
+        royalApes.safeTransferFrom(user1, address(stakingSystem), 1);
         vm.warp(block.timestamp + 1 days);
         stakingSystem.withdrawTokens();
         assertTrue(stakingToken.balanceOf(user1) == 10 * 10e18);
@@ -82,8 +78,7 @@ contract StakingSystemTest is Test {
     function testWithdrawTokensAfter1Day() public {
         vm.startPrank(user1);
         royalApes.mint{value: 1 ether}();
-        royalApes.approve(address(stakingSystem), 1);
-        stakingSystem.stake(1);
+        royalApes.safeTransferFrom(user1, address(stakingSystem), 1);
         vm.warp(block.timestamp + 1.5 days);
         stakingSystem.withdrawTokens();
         assertTrue(stakingToken.balanceOf(user1) == 15 * 10e18);
@@ -92,8 +87,7 @@ contract StakingSystemTest is Test {
     function testWithdrawTokensTooSoon() public {
         vm.startPrank(user1);
         royalApes.mint{value: 1 ether}();
-        royalApes.approve(address(stakingSystem), 1);
-        stakingSystem.stake(1);
+        royalApes.safeTransferFrom(user1, address(stakingSystem), 1);
         vm.warp(block.timestamp + 1 days - 1);
         vm.expectRevert("You cannot claim yet");
         stakingSystem.withdrawTokens();
@@ -102,8 +96,7 @@ contract StakingSystemTest is Test {
     function testWithdrawCannotWithdrawImmediatelyAfterWithdraw() public {
         vm.startPrank(user1);
         royalApes.mint{value: 1 ether}();
-        royalApes.approve(address(stakingSystem), 1);
-        stakingSystem.stake(1);
+        royalApes.safeTransferFrom(user1, address(stakingSystem), 1);
         vm.warp(block.timestamp + 1 days);
         stakingSystem.withdrawTokens();
         assertTrue(stakingToken.balanceOf(user1) == 10 * 10e18);
