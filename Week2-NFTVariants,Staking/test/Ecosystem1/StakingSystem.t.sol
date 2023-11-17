@@ -30,7 +30,6 @@ contract StakingSystemTest is Test {
 
         /// @dev transfer owner of StakingToken to StakingSystem
         stakingToken.transferOwnership(address(stakingSystem));
-        stakingSystem.acceptTokenOwnership();
         assertTrue(stakingToken.owner() == address(stakingSystem));
     }
 

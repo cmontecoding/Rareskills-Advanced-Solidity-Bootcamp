@@ -59,13 +59,6 @@ contract StakingSystem is IERC721Receiver {
         stakingToken.mint(msg.sender, 10);
     }
 
-    /// @dev transfer ownership of StakingToken to StakingSystem
-    /// to allow minting
-    /// @dev (both contracts require each others addresses)
-    function acceptTokenOwnership() public {
-        stakingToken.acceptOwnership();
-    }
-
     function onERC721Received(
         address,
         address,
