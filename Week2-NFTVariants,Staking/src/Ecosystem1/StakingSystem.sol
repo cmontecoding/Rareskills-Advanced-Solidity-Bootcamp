@@ -56,7 +56,10 @@ contract StakingSystem is IERC721Receiver {
         require(timeElapsed >= 1 days, "You cannot claim yet");
         lastClaimedTime[msg.sender] = block.timestamp;
         /// @dev mint proportional amount of tokens based on time elapsed
-        stakingToken.mint(msg.sender, timeElapsed * MINT_AMOUNT_PER_DAY / 1 days);
+        stakingToken.mint(
+            msg.sender,
+            (timeElapsed * MINT_AMOUNT_PER_DAY) / 1 days
+        );
     }
 
     function onERC721Received(
