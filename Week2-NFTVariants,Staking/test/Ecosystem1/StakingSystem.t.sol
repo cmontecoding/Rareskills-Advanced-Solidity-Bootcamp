@@ -76,7 +76,17 @@ contract StakingSystemTest is Test {
         stakingSystem.stake(1);
         vm.warp(block.timestamp + 1 days);
         stakingSystem.withdrawTokens();
-        assertTrue(stakingToken.balanceOf(user1) == 10);
+        assertTrue(stakingToken.balanceOf(user1) == 10 * 10e18);
+    }
+
+    function testWithdrawTokensAfter1Day() public {
+        vm.startPrank(user1);
+        royalApes.mint{value: 1 ether}();
+        royalApes.approve(address(stakingSystem), 1);
+        stakingSystem.stake(1);
+        vm.warp(block.timestamp + 1.5 days);
+        stakingSystem.withdrawTokens();
+        assertTrue(stakingToken.balanceOf(user1) == 15 * 10e18);
     }
 
     function testWithdrawTokensTooSoon() public {
@@ -96,7 +106,7 @@ contract StakingSystemTest is Test {
         stakingSystem.stake(1);
         vm.warp(block.timestamp + 1 days);
         stakingSystem.withdrawTokens();
-        assertTrue(stakingToken.balanceOf(user1) == 10);
+        assertTrue(stakingToken.balanceOf(user1) == 10 * 10e18);
         vm.expectRevert("You cannot claim yet");
         stakingSystem.withdrawTokens();
     }

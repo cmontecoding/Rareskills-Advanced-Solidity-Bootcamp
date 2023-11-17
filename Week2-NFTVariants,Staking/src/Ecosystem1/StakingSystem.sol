@@ -23,6 +23,8 @@ contract StakingSystem is IERC721Receiver {
     /// @dev mapping from address to last claimed time
     mapping(address => uint256) public lastClaimedTime;
 
+    uint256 public constant MINT_AMOUNT_PER_DAY = 10 * 10e18;
+
     constructor(address _royalApesAddress, address _stakingTokenAddress) {
         royalApes = RoyalApes(_royalApesAddress);
         stakingToken = StakingToken(_stakingTokenAddress);
@@ -51,12 +53,11 @@ contract StakingSystem is IERC721Receiver {
 
     function withdrawTokens() public {
         require(isStaked[msg.sender] == true, "You do not have a staked Ape");
-        require(
-            block.timestamp - lastClaimedTime[msg.sender] >= 1 days,
-            "You cannot claim yet"
-        );
+        uint256 timeElapsed = block.timestamp - lastClaimedTime[msg.sender];
+        require(timeElapsed >= 1 days, "You cannot claim yet");
         lastClaimedTime[msg.sender] = block.timestamp;
-        stakingToken.mint(msg.sender, 10);
+        /// @dev mint proportional amount of tokens based on time elapsed
+        stakingToken.mint(msg.sender, timeElapsed * MINT_AMOUNT_PER_DAY / 1 days);
     }
 
     function onERC721Received(
