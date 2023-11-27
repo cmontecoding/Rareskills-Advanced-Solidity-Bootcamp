@@ -6,8 +6,9 @@ import './interfaces/IUniswapV2Factory.sol';
 import './interfaces/IUniswapV2Callee.sol';
 import {ERC20} from "solady/src/tokens/ERC20.sol";
 import {FixedPointMathLib} from "solady/src/utils/FixedPointMathLib.sol";
+import {ReentrancyGuard} from "@openzeppelin/utils/ReentrancyGuard.sol";
 
-contract UniswapV2Pair is IUniswapV2Pair, ERC20 {
+contract UniswapV2Pair is IUniswapV2Pair, ERC20, ReentrancyGuard {
     using UQ112x112 for uint224;
 
     uint public constant MINIMUM_LIQUIDITY = 10**3;
@@ -31,14 +32,6 @@ contract UniswapV2Pair is IUniswapV2Pair, ERC20 {
 
     function symbol() public view virtual override returns (string memory) {
         return "UNI-V2";
-    }
-
-    uint private unlocked = 1;
-    modifier lock() {
-        require(unlocked == 1, 'UniswapV2: LOCKED');
-        unlocked = 0;
-        _;
-        unlocked = 1;
     }
 
     function getReserves() public view returns (uint112 _reserve0, uint112 _reserve1, uint32 _blockTimestampLast) {
@@ -101,7 +94,7 @@ contract UniswapV2Pair is IUniswapV2Pair, ERC20 {
     }
 
     // this low-level function should be called from a contract which performs important safety checks
-    function mint(address to) external lock returns (uint liquidity) {
+    function mint(address to) external nonReentrant returns (uint liquidity) {
         (uint112 _reserve0, uint112 _reserve1,) = getReserves(); // gas savings
         uint balance0 = ERC20(token0).balanceOf(address(this));
         uint balance1 = ERC20(token1).balanceOf(address(this));
@@ -125,7 +118,7 @@ contract UniswapV2Pair is IUniswapV2Pair, ERC20 {
     }
 
     // this low-level function should be called from a contract which performs important safety checks
-    function burn(address to) external lock returns (uint amount0, uint amount1) {
+    function burn(address to) external nonReentrant returns (uint amount0, uint amount1) {
         (uint112 _reserve0, uint112 _reserve1,) = getReserves(); // gas savings
         address _token0 = token0;                                // gas savings
         address _token1 = token1;                                // gas savings
@@ -150,7 +143,7 @@ contract UniswapV2Pair is IUniswapV2Pair, ERC20 {
     }
 
     // this low-level function should be called from a contract which performs important safety checks
-    function swap(uint amount0Out, uint amount1Out, address to, bytes calldata data) external lock {
+    function swap(uint amount0Out, uint amount1Out, address to, bytes calldata data) external nonReentrant {
         require(amount0Out > 0 || amount1Out > 0, 'UniswapV2: INSUFFICIENT_OUTPUT_AMOUNT');
         (uint112 _reserve0, uint112 _reserve1,) = getReserves(); // gas savings
         require(amount0Out < _reserve0 && amount1Out < _reserve1, 'UniswapV2: INSUFFICIENT_LIQUIDITY');
@@ -181,7 +174,7 @@ contract UniswapV2Pair is IUniswapV2Pair, ERC20 {
     }
 
     // force balances to match reserves
-    function skim(address to) external lock {
+    function skim(address to) external nonReentrant {
         address _token0 = token0; // gas savings
         address _token1 = token1; // gas savings
         _safeTransfer(_token0, to, ERC20(_token0).balanceOf(address(this)) - (reserve0));
@@ -189,7 +182,7 @@ contract UniswapV2Pair is IUniswapV2Pair, ERC20 {
     }
 
     // force reserves to match balances
-    function sync() external lock {
+    function sync() external nonReentrant {
         _update(ERC20(token0).balanceOf(address(this)), ERC20(token1).balanceOf(address(this)), reserve0, reserve1);
     }
 }
