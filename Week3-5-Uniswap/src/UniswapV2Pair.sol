@@ -103,7 +103,7 @@ contract UniswapV2Pair is IUniswapV2Pair, ERC20, ReentrancyGuard {
 
         /// @dev Add check to make sure funds were sent to the contract
         /// for users who are not using the Uniswap router
-        require(amount0 > 0 || amount1 > 0, 'UniswapV2: INSUFFICIENT_INPUT_AMOUNT');
+        require(amount0 > 0 && amount1 > 0, 'UniswapV2: INSUFFICIENT_INPUT_AMOUNT');
 
         bool feeOn = _mintFee(_reserve0, _reserve1);
         uint _totalSupply = totalSupply(); // gas savings, must be defined here since totalSupply can update in _mintFee
