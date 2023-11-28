@@ -7,8 +7,9 @@ import './interfaces/IUniswapV2Callee.sol';
 import {ERC20} from "solady/src/tokens/ERC20.sol";
 import {FixedPointMathLib} from "solady/src/utils/FixedPointMathLib.sol";
 import {ReentrancyGuard} from "@openzeppelin/utils/ReentrancyGuard.sol";
+import {IERC3156FlashLender, IERC3156FlashBorrower} from "@openzeppelin/interfaces/IERC3156FlashLender.sol";
 
-contract UniswapV2Pair is IUniswapV2Pair, ERC20, ReentrancyGuard {
+contract UniswapV2Pair is IUniswapV2Pair, ERC20, ReentrancyGuard, IERC3156FlashLender {
     using UQ112x112 for uint224;
 
     uint public constant MINIMUM_LIQUIDITY = 10**3;
@@ -175,6 +176,32 @@ contract UniswapV2Pair is IUniswapV2Pair, ERC20, ReentrancyGuard {
 
         _update(balance0, balance1, _reserve0, _reserve1);
         emit Swap(msg.sender, amount0In, amount1In, amount0Out, amount1Out, to);
+    }
+
+    function maxFlashLoan(address token) external override view returns(uint256) {
+        if (token == token0) {
+            return reserve0;
+        } else if (token == token1) {
+            return reserve1;
+        } else {
+            return 0;
+        }
+    }
+
+    function flashFee(address token, uint256 amount) public override view returns(uint256) {
+        require(token == token0 || token == token1, "UniswapV2: INVALID_TOKEN");
+        return amount * (3) / (1000);
+    }
+
+    function flashLoan(IERC3156FlashBorrower receiver, address token, uint256 amount, bytes calldata data) external override returns(bool) {
+        uint256 fee = flashFee(token, amount);
+        _safeTransfer(token, address(receiver), amount);
+        require(
+            receiver.onFlashLoan(msg.sender, token, amount, fee, data) == keccak256("ERC3156FlashBorrower.onFlashLoan"),
+            "IERC3156: Callback failed"
+        );
+        require(ERC20(token).transferFrom(address(receiver), address(this), amount + (fee)), "UniswapV2: TRANSFER_FROM_FAILED");
+        return true;
     }
 
     // force balances to match reserves
