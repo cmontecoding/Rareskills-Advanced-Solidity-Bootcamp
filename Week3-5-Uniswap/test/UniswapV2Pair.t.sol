@@ -69,6 +69,17 @@ contract UniswapV2PairTest is Test {
         assertEq(token1.balanceOf(address(this)), 10e18 - 1e18 + 900);
     }
 
+    function testMaxFlashLoan() public {
+        token0.transfer(address(pair), 1e18);
+        token1.transfer(address(pair), 2e18);
+        pair.sync();
+        assertEq(token0.balanceOf(address(pair)), 1e18);
+        assertEq(pair.maxFlashLoan(address(token0)), 1e18);
+        assertEq(token1.balanceOf(address(pair)), 2e18);
+        assertEq(pair.maxFlashLoan(address(token1)), 2e18);
+    }
+
+
     function testSkim() public {
         token0.transfer(address(pair), 1e18);
         assertEq(token0.balanceOf(address(pair)), 1e18);
@@ -77,13 +88,6 @@ contract UniswapV2PairTest is Test {
         assertEq(token0.balanceOf(address(this)), 10e18);
     }
 
-    // function testSync() public {
-    //     pair.sync();
-    // }
-
-    // function testInitialize() public {
-    //     pair.initialize(address(0), address(0));
-    // }
 }
 
 contract dummyToken is ERC20 {
