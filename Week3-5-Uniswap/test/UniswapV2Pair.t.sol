@@ -26,15 +26,35 @@ contract UniswapV2PairTest is Test {
         token1.transfer(address(pair), 1e18);
 
         pair.mint(address(this));
+        /// @dev 1e18 - 10e3 (minimum liquidity which is burned) = 999999999999999000
         assertEq(pair.balanceOf(address(this)), 999999999999999000);
         assertEq(pair.balanceOf(address(0)), pair.MINIMUM_LIQUIDITY());
         assertEq(token0.balanceOf(address(pair)), 1e18);
         assertEq(token1.balanceOf(address(pair)), 1e18);
+        assertEq(pair.totalSupply(), pair.MINIMUM_LIQUIDITY() + 999999999999999000);
+        /// @dev same as 1e18 (sanity check)
+        assertEq(pair.totalSupply(), 1e18);
     }
 
-    // function testBurn() public {
-    //     pair.burn(address(0));
-    // }
+    function testBurn() public {
+        token0.transfer(address(pair), 1e18);
+        token1.transfer(address(pair), 1e18);
+        pair.mint(address(this));
+
+        pair.transfer(address(pair), 999999999999999000);
+        pair.burn(address(this));
+        assertEq(pair.balanceOf(address(this)), 0);
+        assertEq(pair.balanceOf(address(pair)), 0);
+        assertEq(pair.totalSupply(), pair.MINIMUM_LIQUIDITY());
+        assertEq(token0.balanceOf(address(pair)), 1000);
+        assertEq(token1.balanceOf(address(pair)), 1000);
+        assertEq(token0.balanceOf(address(this)), 10e18 - 1000);
+        assertEq(token1.balanceOf(address(this)), 10e18 - 1000);
+
+        /// @dev sanity check that tokens werent burned
+        assertEq(token0.totalSupply(), 10e18);
+        assertEq(token1.totalSupply(), 10e18);
+    }
 
     // function testSwap() public {
     //     pair.swap(0, 0, address(0), "");
