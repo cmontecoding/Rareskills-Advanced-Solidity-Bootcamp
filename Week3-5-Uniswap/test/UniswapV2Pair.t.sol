@@ -79,6 +79,15 @@ contract UniswapV2PairTest is Test {
         assertEq(pair.maxFlashLoan(address(token1)), 2e18);
     }
 
+    function testFlashFee() public {
+        token0.transfer(address(pair), 1e18);
+        token1.transfer(address(pair), 2e18);
+        pair.sync();
+        assertEq(token0.balanceOf(address(pair)), 1e18);
+        assertEq(pair.flashFee(address(token0), 1e18), 3e15);
+        assertEq(token1.balanceOf(address(pair)), 2e18);
+        assertEq(pair.flashFee(address(token1), 2e18), 6e15);
+    }
 
     function testSkim() public {
         token0.transfer(address(pair), 1e18);
