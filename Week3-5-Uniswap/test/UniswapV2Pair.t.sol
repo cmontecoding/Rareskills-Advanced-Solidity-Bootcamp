@@ -1,7 +1,7 @@
 pragma solidity 0.8.21;
 
 import {Test} from "forge-std/test.sol";
-import {UniswapV2Pair, ERC20} from "../src/UniswapV2Pair.sol";
+import {UniswapV2Pair, ERC20, IERC3156FlashBorrower} from "../src/UniswapV2Pair.sol";
 import {UniswapV2Factory} from "../src/UniswapV2Factory.sol";
 
 contract UniswapV2PairTest is Test {
@@ -9,10 +9,12 @@ contract UniswapV2PairTest is Test {
     UniswapV2Pair pair;
     dummyToken token0;
     dummyToken token1;
+    dummyBorrower borrower;
 
     function setUp() public {
         token0 = new dummyToken("token0", "T0");
         token1 = new dummyToken("token1", "T1");
+        borrower = new dummyBorrower();
         factory = new UniswapV2Factory(address(this));
         factory.createPair(address(token0), address(token1));
         pair = UniswapV2Pair(factory.getPair(address(token0), address(token1)));
@@ -89,6 +91,16 @@ contract UniswapV2PairTest is Test {
         assertEq(pair.flashFee(address(token1), 2e18), 6e15);
     }
 
+    function testFlashLoan() public {
+        token0.transfer(address(pair), 1e18);
+        token0.transfer(address(borrower), 3);
+        pair.sync();
+        assertEq(token0.balanceOf(address(pair)), 1e18);
+        pair.flashLoan(borrower, address(token0), 1000, "");
+        assertEq(token0.balanceOf(address(pair)), 1e18 + 3);
+        assertEq(token0.balanceOf(address(borrower)), 0);
+    }
+
     function testSkim() public {
         token0.transfer(address(pair), 1e18);
         assertEq(token0.balanceOf(address(pair)), 1e18);
@@ -114,6 +126,21 @@ contract dummyToken is ERC20 {
 
     function symbol() public view override returns (string memory) {
         return "symbole";
+    }
+
+}
+
+contract dummyBorrower is IERC3156FlashBorrower {
+
+    function onFlashLoan(
+        address initiator,
+        address token,
+        uint256 amount,
+        uint256 fee,
+        bytes calldata data
+    ) external override returns (bytes32) {
+        dummyToken(token).approve(msg.sender, amount + fee);
+        return keccak256("ERC3156FlashBorrower.onFlashLoan");
     }
 
 }
