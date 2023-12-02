@@ -69,9 +69,13 @@ contract UniswapV2PairTest is Test {
         assertEq(token1.balanceOf(address(this)), 10e18 - 1e18 + 900);
     }
 
-    // function testSkim() public {
-    //     pair.skim(address(0));
-    // }
+    function testSkim() public {
+        token0.transfer(address(pair), 1e18);
+        assertEq(token0.balanceOf(address(pair)), 1e18);
+        pair.skim(address(this));
+        assertEq(token0.balanceOf(address(pair)), 0);
+        assertEq(token0.balanceOf(address(this)), 10e18);
+    }
 
     // function testSync() public {
     //     pair.sync();
