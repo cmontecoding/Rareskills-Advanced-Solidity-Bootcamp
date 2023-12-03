@@ -33,7 +33,10 @@ contract UniswapV2PairTest is Test {
         assertEq(pair.balanceOf(address(0)), pair.MINIMUM_LIQUIDITY());
         assertEq(token0.balanceOf(address(pair)), 1e18);
         assertEq(token1.balanceOf(address(pair)), 1e18);
-        assertEq(pair.totalSupply(), pair.MINIMUM_LIQUIDITY() + 999999999999999000);
+        assertEq(
+            pair.totalSupply(),
+            pair.MINIMUM_LIQUIDITY() + 999999999999999000
+        );
         /// @dev same as 1e18 (sanity check)
         assertEq(pair.totalSupply(), 1e18);
     }
@@ -108,13 +111,10 @@ contract UniswapV2PairTest is Test {
     //     assertEq(token0.balanceOf(address(pair)), 0);
     //     assertEq(token0.balanceOf(address(this)), 10e18);
     // }
-
 }
 
 contract dummyToken is ERC20 {
-
-    constructor(string memory name_, string memory symbol_) {
-    }
+    constructor(string memory name_, string memory symbol_) {}
 
     function mint(address to, uint256 amount) public {
         _mint(to, amount);
@@ -127,11 +127,9 @@ contract dummyToken is ERC20 {
     function symbol() public view override returns (string memory) {
         return "symbole";
     }
-
 }
 
 contract dummyBorrower is IERC3156FlashBorrower {
-
     function onFlashLoan(
         address initiator,
         address token,
@@ -142,5 +140,4 @@ contract dummyBorrower is IERC3156FlashBorrower {
         dummyToken(token).approve(msg.sender, amount + fee);
         return keccak256("ERC3156FlashBorrower.onFlashLoan");
     }
-
 }
