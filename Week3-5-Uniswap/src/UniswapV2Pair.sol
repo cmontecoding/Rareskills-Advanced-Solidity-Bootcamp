@@ -3,7 +3,6 @@ pragma solidity 0.8.21;
 import "./interfaces/IUniswapV2Pair.sol";
 import "./libraries/UQ112x112.sol";
 import "./interfaces/IUniswapV2Factory.sol";
-import "./interfaces/IUniswapV2Callee.sol";
 import {ERC20} from "solady/src/tokens/ERC20.sol";
 import {FixedPointMathLib} from "solady/src/utils/FixedPointMathLib.sol";
 import {ReentrancyGuard} from "@openzeppelin/utils/ReentrancyGuard.sol";
@@ -193,9 +192,7 @@ contract UniswapV2Pair is
     }
 
     // this low-level function should be called from a contract which performs important safety checks
-    function mint(
-        address to
-    ) internal returns (uint liquidity) {
+    function mint(address to) internal returns (uint liquidity) {
         (uint112 _reserve0, uint112 _reserve1, ) = getReserves(); // gas savings
         uint balance0 = ERC20(token0).balanceOf(address(this));
         uint balance1 = ERC20(token1).balanceOf(address(this));
@@ -245,9 +242,7 @@ contract UniswapV2Pair is
     }
 
     // this low-level function should be called from a contract which performs important safety checks
-    function burn(
-        address to
-    ) internal returns (uint amount0, uint amount1) {
+    function burn(address to) internal returns (uint amount0, uint amount1) {
         (uint112 _reserve0, uint112 _reserve1, ) = getReserves(); // gas savings
         address _token0 = token0; // gas savings
         address _token1 = token1; // gas savings
@@ -274,13 +269,46 @@ contract UniswapV2Pair is
         emit Burn(msg.sender, amount0, amount1, to);
     }
 
-    // this low-level function should be called from a contract which performs important safety checks
-    function swap(
-        uint amount0Out,
-        uint amount1Out,
-        address to,
-        bytes calldata data
+    function swapExactTokens0ForTokens1(
+        uint amountIn,
+        uint amountOutMin,
+        address to
     ) external nonReentrant {
+        require(amountIn > 0, "UniswapV2Library: INSUFFICIENT_INPUT_AMOUNT");
+        (uint reserveIn, uint reserveOut, ) = getReserves();
+        uint amountInWithFee = amountIn * 997;
+        uint numerator = amountInWithFee * reserveOut;
+        uint denominator = reserveIn * 1000 + amountInWithFee;
+        uint amountOut = numerator / denominator;
+        require(
+            amountOut >= amountOutMin,
+            "UniswapV2Library: INSUFFICIENT_OUTPUT_AMOUNT"
+        );
+        ERC20(token0).transferFrom(msg.sender, address(this), amountIn);
+        swap(0, amountOut, to);
+    }
+
+    function swapExactTokens1ForTokens0(
+        uint amountIn,
+        uint amountOutMin,
+        address to
+    ) external nonReentrant {
+        require(amountIn > 0, "UniswapV2Library: INSUFFICIENT_INPUT_AMOUNT");
+        (uint reserveOut, uint reserveIn, ) = getReserves();
+        uint amountInWithFee = amountIn * 997;
+        uint numerator = amountInWithFee * reserveOut;
+        uint denominator = reserveIn * 1000 + amountInWithFee;
+        uint amountOut = numerator / denominator;
+        require(
+            amountOut >= amountOutMin,
+            "UniswapV2Library: INSUFFICIENT_OUTPUT_AMOUNT"
+        );
+        ERC20(token1).transferFrom(msg.sender, address(this), amountIn);
+        swap(amountOut, 0, to);
+    }
+
+    // this low-level function should be called from a contract which performs important safety checks
+    function swap(uint amount0Out, uint amount1Out, address to) internal {
         require(
             amount0Out > 0 || amount1Out > 0,
             "UniswapV2: INSUFFICIENT_OUTPUT_AMOUNT"
@@ -300,13 +328,6 @@ contract UniswapV2Pair is
             require(to != _token0 && to != _token1, "UniswapV2: INVALID_TO");
             if (amount0Out > 0) _safeTransfer(_token0, to, amount0Out); // optimistically transfer tokens
             if (amount1Out > 0) _safeTransfer(_token1, to, amount1Out); // optimistically transfer tokens
-            if (data.length > 0)
-                IUniswapV2Callee(to).uniswapV2Call(
-                    msg.sender,
-                    amount0Out,
-                    amount1Out,
-                    data
-                );
             balance0 = ERC20(_token0).balanceOf(address(this));
             balance1 = ERC20(_token1).balanceOf(address(this));
         }

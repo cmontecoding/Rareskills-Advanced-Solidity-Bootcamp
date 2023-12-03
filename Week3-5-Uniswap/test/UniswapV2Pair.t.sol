@@ -49,7 +49,6 @@ contract UniswapV2PairTest is Test {
         token1.approve(address(pair), 1e18);
         pair.mintWithChecks(address(this), 1e18, 1e18, 1e18, 1e18);
 
-       
         ERC20(address(pair)).approve(address(pair), 999999999999999000);
         pair.burnWithChecks(address(this), 999999999999999000, 0, 0);
         assertEq(pair.balanceOf(address(this)), 0);
@@ -65,56 +64,73 @@ contract UniswapV2PairTest is Test {
         assertEq(token1.totalSupply(), 10e18);
     }
 
-    // function testSwap() public {
-    //     token0.transfer(address(pair), 1e18);
-    //     token1.transfer(address(pair), 1e18);
-    //     pair.mint(address(this));
+    function testSwap() public {
+        token0.approve(address(pair), 1e18);
+        token1.approve(address(pair), 1e18);
+        pair.mintWithChecks(address(this), 1e18, 1e18, 1e18, 1e18);
 
-    //     token0.transfer(address(pair), 1000);
-    //     pair.swap(900, 0, address(this), "");
-    //     assertEq(token0.balanceOf(address(pair)), 1e18 + 1000);
-    //     assertEq(token1.balanceOf(address(pair)), 1e18 - 900);
-    //     assertEq(token0.balanceOf(address(this)), 10e18 - 1e18 - 1000);
-    //     assertEq(token1.balanceOf(address(this)), 10e18 - 1e18 + 900);
-    // }
+        /// @dev token0 and token1 are backwards because of the constructor
+        /// but functionality is correct
+        token1.approve(address(pair), 1000);
+        pair.swapExactTokens0ForTokens1(1000, 0, address(this));
+        assertEq(token1.balanceOf(address(pair)), 1e18 + 1000);
+        assertEq(token0.balanceOf(address(pair)), 1e18 - 996);
+        assertEq(token1.balanceOf(address(this)), 10e18 - 1e18 - 1000);
+        assertEq(token0.balanceOf(address(this)), 10e18 - 1e18 + 996);
+    }
 
-    // function testMaxFlashLoan() public {
-    //     token0.transfer(address(pair), 1e18);
-    //     token1.transfer(address(pair), 2e18);
-    //     pair.sync();
-    //     assertEq(token0.balanceOf(address(pair)), 1e18);
-    //     assertEq(pair.maxFlashLoan(address(token0)), 1e18);
-    //     assertEq(token1.balanceOf(address(pair)), 2e18);
-    //     assertEq(pair.maxFlashLoan(address(token1)), 2e18);
-    // }
+    function testSwap2() public {
+        token0.approve(address(pair), 1e18);
+        token1.approve(address(pair), 1e18);
+        pair.mintWithChecks(address(this), 1e18, 1e18, 1e18, 1e18);
 
-    // function testFlashFee() public {
-    //     token0.transfer(address(pair), 1e18);
-    //     token1.transfer(address(pair), 2e18);
-    //     pair.sync();
-    //     assertEq(token0.balanceOf(address(pair)), 1e18);
-    //     assertEq(pair.flashFee(address(token0), 1e18), 3e15);
-    //     assertEq(token1.balanceOf(address(pair)), 2e18);
-    //     assertEq(pair.flashFee(address(token1), 2e18), 6e15);
-    // }
+        /// @dev token0 and token1 are backwards because of the constructor
+        /// but functionality is correct
+        token0.approve(address(pair), 1000);
+        pair.swapExactTokens1ForTokens0(1000, 0, address(this));
+        assertEq(token0.balanceOf(address(pair)), 1e18 + 1000);
+        assertEq(token1.balanceOf(address(pair)), 1e18 - 996);
+        assertEq(token0.balanceOf(address(this)), 10e18 - 1e18 - 1000);
+        assertEq(token1.balanceOf(address(this)), 10e18 - 1e18 + 996);
+    }
 
-    // function testFlashLoan() public {
-    //     token0.transfer(address(pair), 1e18);
-    //     token0.transfer(address(borrower), 3);
-    //     pair.sync();
-    //     assertEq(token0.balanceOf(address(pair)), 1e18);
-    //     pair.flashLoan(borrower, address(token0), 1000, "");
-    //     assertEq(token0.balanceOf(address(pair)), 1e18 + 3);
-    //     assertEq(token0.balanceOf(address(borrower)), 0);
-    // }
+    function testMaxFlashLoan() public {
+        token0.transfer(address(pair), 1e18);
+        token1.transfer(address(pair), 2e18);
+        pair.sync();
+        assertEq(token0.balanceOf(address(pair)), 1e18);
+        assertEq(pair.maxFlashLoan(address(token0)), 1e18);
+        assertEq(token1.balanceOf(address(pair)), 2e18);
+        assertEq(pair.maxFlashLoan(address(token1)), 2e18);
+    }
 
-    // function testSkim() public {
-    //     token0.transfer(address(pair), 1e18);
-    //     assertEq(token0.balanceOf(address(pair)), 1e18);
-    //     pair.skim(address(this));
-    //     assertEq(token0.balanceOf(address(pair)), 0);
-    //     assertEq(token0.balanceOf(address(this)), 10e18);
-    // }
+    function testFlashFee() public {
+        token0.transfer(address(pair), 1e18);
+        token1.transfer(address(pair), 2e18);
+        pair.sync();
+        assertEq(token0.balanceOf(address(pair)), 1e18);
+        assertEq(pair.flashFee(address(token0), 1e18), 3e15);
+        assertEq(token1.balanceOf(address(pair)), 2e18);
+        assertEq(pair.flashFee(address(token1), 2e18), 6e15);
+    }
+
+    function testFlashLoan() public {
+        token0.transfer(address(pair), 1e18);
+        token0.transfer(address(borrower), 3);
+        pair.sync();
+        assertEq(token0.balanceOf(address(pair)), 1e18);
+        pair.flashLoan(borrower, address(token0), 1000, "");
+        assertEq(token0.balanceOf(address(pair)), 1e18 + 3);
+        assertEq(token0.balanceOf(address(borrower)), 0);
+    }
+
+    function testSkim() public {
+        token0.transfer(address(pair), 1e18);
+        assertEq(token0.balanceOf(address(pair)), 1e18);
+        pair.skim(address(this));
+        assertEq(token0.balanceOf(address(pair)), 0);
+        assertEq(token0.balanceOf(address(this)), 10e18);
+    }
 }
 
 contract dummyToken is ERC20 {
