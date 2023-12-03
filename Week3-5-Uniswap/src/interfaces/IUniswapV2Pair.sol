@@ -37,7 +37,7 @@ interface IUniswapV2Pair {
 
     function kLast() external view returns (uint);
 
-    function mint(
+    function mintWithChecks(
         address to,
         uint amountADesired,
         uint amountBDesired,
@@ -45,7 +45,12 @@ interface IUniswapV2Pair {
         uint amountBMin
     ) external returns (uint liquidity);
 
-    function burn(address to) external returns (uint amount0, uint amount1);
+    function burnWithChecks(
+        address to,
+        uint liquidity,
+        uint amountAMin,
+        uint amountBMin
+    ) external returns (uint amount0, uint amount1);
 
     function swap(
         uint amount0Out,

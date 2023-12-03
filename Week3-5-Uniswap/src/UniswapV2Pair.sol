@@ -173,8 +173,8 @@ contract UniswapV2Pair is
         amountB = (amountA * reserveB) / reserveA;
     }
 
-    // this low-level function should be called from a contract which performs important safety checks
-    function mint(
+    /// @dev refactored to avoid stack too deep
+    function mintWithChecks(
         address to,
         uint amountADesired,
         uint amountBDesired,
@@ -189,7 +189,13 @@ contract UniswapV2Pair is
         );
         ERC20(token0).transferFrom(msg.sender, address(this), amountA);
         ERC20(token1).transferFrom(msg.sender, address(this), amountB);
+        liquidity = mint(to);
+    }
 
+    // this low-level function should be called from a contract which performs important safety checks
+    function mint(
+        address to
+    ) internal returns (uint liquidity) {
         (uint112 _reserve0, uint112 _reserve1, ) = getReserves(); // gas savings
         uint balance0 = ERC20(token0).balanceOf(address(this));
         uint balance1 = ERC20(token1).balanceOf(address(this));
@@ -224,10 +230,24 @@ contract UniswapV2Pair is
         emit Mint(msg.sender, amount0, amount1);
     }
 
+    /// @dev refactored to avoid stack too deep
+    function burnWithChecks(
+        address to,
+        uint liquidity,
+        uint amountAMin,
+        uint amountBMin
+    ) external nonReentrant returns (uint amount0, uint amount1) {
+        /// @dev send liquidity to pair
+        ERC20(address(this)).transferFrom(msg.sender, address(this), liquidity);
+        (amount0, amount1) = burn(to);
+        require(amount0 >= amountAMin, "UniswapV2: INSUFFICIENT_A_AMOUNT");
+        require(amount1 >= amountBMin, "UniswapV2: INSUFFICIENT_B_AMOUNT");
+    }
+
     // this low-level function should be called from a contract which performs important safety checks
     function burn(
         address to
-    ) external nonReentrant returns (uint amount0, uint amount1) {
+    ) internal returns (uint amount0, uint amount1) {
         (uint112 _reserve0, uint112 _reserve1, ) = getReserves(); // gas savings
         address _token0 = token0; // gas savings
         address _token1 = token1; // gas savings
