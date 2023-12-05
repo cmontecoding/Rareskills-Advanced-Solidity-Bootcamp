@@ -397,6 +397,9 @@ contract UniswapV2Pair is
             ),
             "UniswapV2: TRANSFER_FROM_FAILED"
         );
+        uint balance0 = ERC20(token0).balanceOf(address(this));
+        uint balance1 = ERC20(token1).balanceOf(address(this));
+        _update(balance0, balance1, reserve0, reserve1);
         return true;
     }
 

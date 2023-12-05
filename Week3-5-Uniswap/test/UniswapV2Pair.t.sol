@@ -122,6 +122,8 @@ contract UniswapV2PairTest is Test {
         pair.flashLoan(borrower, address(token0), 1000, "");
         assertEq(token0.balanceOf(address(pair)), 1e18 + 3);
         assertEq(token0.balanceOf(address(borrower)), 0);
+        (uint reserve0, uint reserve1, ) = pair.getReserves();
+        assertEq(reserve1, 1e18 + 3);
     }
 
     function testSkim() public {
