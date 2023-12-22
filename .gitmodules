@@ -7,3 +7,6 @@
 [submodule "Week3-5-Uniswap/hello_foundry/lib/forge-std"]
 	path = Week3-5-Uniswap/hello_foundry/lib/forge-std
 	url = https://github.com/foundry-rs/forge-std
+[submodule "Week6-7-Testing/lib/forge-std"]
+	path = Week6-7-Testing/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
