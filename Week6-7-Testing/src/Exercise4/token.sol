@@ -1,5 +1,6 @@
-// SPDX-License-Identifier: AGPL-3.0
 pragma solidity ^0.8.0;
+
+/// @notice The issues from exercises 1 and 2 are fixed.
 
 contract Ownable {
     address public owner = msg.sender;
@@ -34,7 +35,7 @@ contract Pausable is Ownable {
 contract Token is Ownable, Pausable {
     mapping(address => uint256) public balances;
 
-    function transfer(address to, uint256 value) public whenNotPaused {
+    function transfer(address to, uint256 value) public virtual whenNotPaused {
         balances[msg.sender] -= value;
         balances[to] += value;
     }

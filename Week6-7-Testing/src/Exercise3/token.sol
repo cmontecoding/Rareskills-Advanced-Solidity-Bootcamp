@@ -1,5 +1,6 @@
-// SPDX-License-Identifier: AGPL-3.0
 pragma solidity ^0.8.0;
+
+/// @notice The issues from exercises 1 and 2 are fixed.
 
 contract Ownable {
     address public owner = msg.sender;

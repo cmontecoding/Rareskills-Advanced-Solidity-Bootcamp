@@ -16,6 +16,6 @@ contract TestToken is Token {
     }
 
     function echidna_test_balance() public view returns (bool) {
-        return balances[echidna] == 10_000;
+        return balances[echidna] <= 10_000;
     }
 }
