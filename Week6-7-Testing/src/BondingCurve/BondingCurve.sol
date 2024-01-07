@@ -39,7 +39,7 @@ contract BondingCurve is ERC20, Ownable2Step {
 
     function purchaseTokens(
         uint256 _tokensToBuy
-    ) public payable throttleGas {
+    ) external payable throttleGas {
         require(_tokensToBuy > 0, "Invalid token amount");
         uint256 price = calculatePurchasePrice(_tokensToBuy);
         require(msg.value >= price, "Insufficient payment");
@@ -49,7 +49,7 @@ contract BondingCurve is ERC20, Ownable2Step {
         emit TokensPurchased(msg.sender, _tokensToBuy, price, totalSupply());
     }
 
-    function sellTokens(uint256 _tokensToSell) public {
+    function sellTokens(uint256 _tokensToSell) external {
         require(_tokensToSell > 0, "Invalid token amount");
 
         uint256 price = calculateSalePrice(_tokensToSell);
