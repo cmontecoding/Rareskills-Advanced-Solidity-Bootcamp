@@ -1,0 +1,2 @@
+# provide solc remappings to crytic-compile
+cryticArgs: ['--solc-remaps', '@=node_modules/@']
