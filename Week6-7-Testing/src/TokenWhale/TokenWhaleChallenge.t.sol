@@ -6,7 +6,7 @@ import "./TokenWhaleChallenge.sol";
 /// @dev Run the template with
 ///      ```
 ///      solc-select use 0.4.25 --always-install
-///      echidna src/TokenWhale/solution.sol --contract TokenWhaleChallengeTest
+///      echidna src/TokenWhale/TokenWhaleChallenge.t.sol --contract TokenWhaleChallengeTest
 ///      ```
 contract TokenWhaleChallengeTest is TokenWhaleChallenge {
     address echidna = msg.sender;
