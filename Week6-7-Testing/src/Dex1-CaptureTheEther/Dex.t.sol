@@ -5,10 +5,10 @@ import "./Dex.sol";
 
 /// @dev Run the template with
 ///      ```
-///      solc-select use 0.8.0
-///      echidna program-analysis/echidna/exercises/exercise1/template.sol
+///      solc-select use 0.8.20 --always-install
+///      echidna src/Dex1-CaptureTheEther/Dex.t.sol --contract DexTest
 ///      ```
-contract Test is Dex {
+contract DexTest is Dex {
 
     address public emptyAddress = address(0x1);
 
