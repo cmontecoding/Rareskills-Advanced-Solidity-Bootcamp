@@ -29,4 +29,4 @@ contract TokenWhaleChallengeTest is TokenWhaleChallenge {
 // A calls transfer(A, 99999); // A now has infinite tokens to send to B
 
 // explanation: transferFrom() sends tokens from msg.sender instead of the from address.
-// OZ ERC20 does ```_transfer(from, to, value);```
+// Correction: OZ ERC20.sol does ```_transfer(from, to, value);```
