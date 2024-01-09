@@ -14,7 +14,6 @@ contract TestToken is TokenWhaleChallenge {
     // }
 
     function echidna_test_balance() public view returns (bool) {
-        //return balanceOf[echidna] <= 1000;
         return isComplete() == false;
     }
 }
