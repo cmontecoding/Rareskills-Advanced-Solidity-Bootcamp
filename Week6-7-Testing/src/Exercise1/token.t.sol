@@ -5,8 +5,8 @@ import "./token.sol";
 
 /// @dev Run the template with
 ///      ```
-///      solc-select use 0.8.0
-///      echidna program-analysis/echidna/exercises/exercise1/template.sol
+///      solc-select use 0.8.0 --always-install
+///      echidna src/Exercise1/token.t.sol --contract TestToken
 ///      ```
 contract TestToken is Token {
     address echidna = tx.origin;

@@ -4,8 +4,8 @@ import "./token.sol";
 
 /// @dev Run the template with
 ///      ```
-///      solc-select use 0.8.0
-///      echidna program-analysis/echidna/exercises/exercise4/template.sol --contract TestToken --test-mode assertion
+///      solc-select use 0.8.0 --always-install
+///      echidna src/Exercise4/token.t.sol --contract TestToken --test-mode assertion
 ///      ```
 contract TestToken is Token {
     function transfer(address to, uint256 value) public override {

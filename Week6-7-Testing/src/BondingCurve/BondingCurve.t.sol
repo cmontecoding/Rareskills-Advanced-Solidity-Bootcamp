@@ -5,8 +5,8 @@ import "./BondingCurve.sol";
 
 /// @dev Run the template with
 ///      ```
-///      solc-select use 0.8.0
-///      echidna program-analysis/echidna/exercises/exercise1/template.sol
+///      solc-select use 0.8.20 --always-install
+///      echidna src/BondingCurve/BondingCurve.t.sol --contract Test
 ///      ```
 contract Test is BondingCurve {
 
