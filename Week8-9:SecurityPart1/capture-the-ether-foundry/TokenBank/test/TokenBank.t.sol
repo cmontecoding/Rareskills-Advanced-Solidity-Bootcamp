@@ -16,7 +16,7 @@ contract TankBankTest is Test {
         tokenBankAttacker = new TokenBankAttacker(address(tokenBankChallenge));
 
         // Put your solution here
-
+        tokenBankAttacker.exploit();
         _checkSolved();
     }
 
