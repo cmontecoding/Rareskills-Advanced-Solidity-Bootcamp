@@ -23,7 +23,8 @@ contract TokenWhaleTest is Test {
     // Use vm.startPrank and vm.stopPrank to change between msg.sender
     function testExploit() public {
         // Put your solution here
-
+        tokenWhale.approve(address(exploitContract), type(uint256).max);
+        exploitContract.exploit();
         _checkSolved();
     }
 
