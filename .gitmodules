@@ -10,3 +10,6 @@
 [submodule "Week6-7-Testing/lib/forge-std"]
 	path = Week6-7-Testing/lib/forge-std
 	url = https://github.com/foundry-rs/forge-std
+[submodule "Week8-11:Security/solidity-riddles-foundry/lib/forge-std"]
+	path = Week8-11:Security/solidity-riddles-foundry/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
