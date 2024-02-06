@@ -8,5 +8,16 @@
  */
 
 #define macro MAIN() = takes(0) returns(0) {
+    // store balance in memory in offset 0
+    caller          // [caller]
+    balance         // [balance]
+    0x00            // [0, balance]
+    mstore          // []
+
+    // return balance
+    // return 32 bytes of memory starting at offset 0
+    0x20        // [32]
+    0x00        // [0, 32]
+    return      // []
    
 }

@@ -13,5 +13,22 @@
 
 
 #define macro MAIN() = takes(0) returns(0) {
+    // Get the function selector
+    0x00 calldataload 0xE0 shr          // [func_sig]
 
+    __FUNC_SIG(add1) eq add1 jumpi // jump to add1 if func signature matches
+
+    0x00 dup1 revert // Revert if no match is found.
+
+    add1:
+        ADD_ONE()
+}
+
+#define macro ADD_ONE() = takes(0) returns(0) {
+    0x04 calldataload     // load first 32 bytes onto the stack - number 1
+    0x01
+    add                   // add number 1 and 2 and put the result onto the stack
+
+    0x00 mstore           // place the result in memory
+    0x20 0x00 return      // return the result
 }
