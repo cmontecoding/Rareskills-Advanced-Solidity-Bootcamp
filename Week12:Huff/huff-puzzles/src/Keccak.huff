@@ -9,5 +9,30 @@
 
 
  #define macro MAIN() = takes(0) returns(0) {
-    
+    // 0x00 => pointer to bytes
+    // 0x20 => length
+    // 0x40 => actual bytes
+
+    // store first 32 bytes in memory
+    0x00 calldataload   // [calldata (actual bytes)]
+    0x00                // [0, calldata]
+    mstore              // store calldata in memory
+
+    // store second 32 bytes in memory
+    0x20 calldataload   // [calldata (actual bytes)]
+    0x20                // [offset, calldata]
+    mstore              // store calldata in memory
+
+    // store third 32 bytes in memory
+    0x40 calldataload   // [calldata (actual bytes)]
+    0x40                // [offset, calldata]
+    mstore              // store calldata in memory
+
+    // hash all bytes of calldata in memory
+    0x60                // [size]
+    0x00                // [offset, size]
+    sha3                // [hash]
+
+    0x00 mstore
+    0x20 0x00 return
  }

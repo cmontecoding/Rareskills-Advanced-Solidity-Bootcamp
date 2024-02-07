@@ -10,5 +10,62 @@
 #define function maxOfArray(uint256[]) payable returns(uint256)
 
 #define macro MAIN() = takes(0) returns(0) {
-   
+    0x00 calldataload 0xE0 shr          // [func_sig]
+
+    __FUNC_SIG(maxOfArray) eq maxOfArray jumpi // jump to if func signature matches
+
+    0x00 dup1 revert
+
+    maxOfArray:
+        MAX_OF_ARRAY()
+}
+
+#define macro MAX_OF_ARRAY() = takes(0) returns(0) {
+    // 0x00 => function signature
+    // 0x04 => pointer to dynamic array (0x24)
+    // 0x24 => length
+    // 0x44 => first element
+    // 0x64 => second element etc.
+
+    0x00 0x24 calldataload  // [array length, 0]
+
+    iszero noItems jumpi    // if array length is zero, jump to finish
+                            // [i = 0]
+    0x00                    // [max = 0, i = 0]
+
+
+    iterate:                // [max, i]
+        dup2                // [i, max, i]
+        0x24 calldataload   // [length, i, max, i]
+        eq finish jumpi     // [max, i]
+        dup2                // [i, max, i]
+        0x20 mul            // [i * 32, max, i]
+        0x44 add            // [(i * 32) + 4, max, i]
+        calldataload        // [element, max, i]
+        dup1                // [element, element, max, i]
+        dup3                // [max, element, element, max, i]
+        lt                  // [max < element, element, max, i]
+        updateMax jumpi     // [element, max, i]
+
+        pop                 // [max, i]
+        swap1               // [i, max]
+        0x01 add            // [i + 1, max]
+        swap1               // [max, i + 1]
+        iterate jump        // [max, i + 1]
+
+    updateMax:              // [element, max, i]
+        swap1               // [max, element, i]
+        pop                 // [element, i]
+        swap1               // [i, max]
+        0x01 add            // [i + 1, max]
+        swap1               // [max, i + 1]
+        iterate jump        // [max, i + 1]
+
+
+    finish:                 // [sum, i]
+        0x00 mstore         // store result in memory
+        0x20 0x00 return    // return from memory
+
+    noItems:
+        0x00 dup1 revert
 }

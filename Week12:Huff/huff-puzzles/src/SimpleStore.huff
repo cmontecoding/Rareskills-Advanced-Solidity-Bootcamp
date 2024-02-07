@@ -14,7 +14,32 @@
 #define function store(uint256) payable returns()
 #define function read() payable returns(uint256)
 
+#define macro STORE() = takes(0) returns (0) {
+    0x04 calldataload // load first 32 bytes onto the stack - number 1
+    0x00 
+    sstore
+}
+
+#define macro READ() = takes(0) returns (0) {
+    0x00
+    sload
+
+    0x00 mstore
+    0x20 0x00 return
+}
 
 #define macro MAIN() = takes(0) returns(0) {
-    
+    returndatasize calldataload
+    0xE0 shr
+    dup1 __FUNC_SIG(store) eq store jumpi
+    __FUNC_SIG(read) eq read jumpi
+
+    // if function doesnt match, revert
+    invalid
+
+    store:
+        STORE()
+
+    read:
+        READ()
 }

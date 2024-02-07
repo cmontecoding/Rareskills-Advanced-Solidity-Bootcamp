@@ -12,5 +12,45 @@
 
 
 #define macro MAIN() = takes(0) returns(0) {
+    0x00 calldataload 0xE0 shr          // [func_sig]
 
+    __FUNC_SIG(sumArray) eq sumArray jumpi // jump to if func signature matches
+
+    0x00 dup1 revert
+
+    sumArray:
+        SUM_ARRAY()
+}
+
+#define macro SUM_ARRAY() = takes(0) returns(0) {
+    // 0x00 => function signature
+    // 0x04 => pointer to dynamic array (0x24)
+    // 0x24 => length
+    // 0x44 => first element
+    // 0x64 => second element etc.
+
+    0x00 0x24 calldataload       // [array length, 0]
+
+    iszero finish jumpi     // if array length is zero, jump to finish
+                            // [i = 0]
+    0x00                    // [sum = 0, i = 0]
+
+    iterate:                // [sum, i]
+        dup2                // [i, sum, i]
+        0x24 calldataload   // [length, i, sum, i]
+        eq finish jumpi     // [sum, i]
+        dup2                // [i, sum, i]
+        0x20 mul            // [i * 32, sum, i]
+        0x44 add            // [(i * 32) + 0x44, sum, i]
+        calldataload        // [element, sum, i]
+        add                 // [newSum, i]
+        swap1               // [i, newSum]
+        0x01 add            // [i + 1, newSum]
+        swap1               // [newSum, i + 1]
+        iterate jump        // [newSum, i + 1]
+
+
+    finish:                 // [sum, i]
+        0x00 mstore         // store result in memory
+        0x20 0x00 return    // return from memory
 }
