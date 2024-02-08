@@ -1,4 +1,4 @@
- 
+
 /** 
  *  CREATE HUFF EXERCISE
  *  
@@ -9,9 +9,77 @@
  *  NOTICE: The contract should revert when an unrecognized function is called
  */
 
- #define function makeContract() payable returns(address)
+#define function makeContract() payable returns(address)
 
 
- #define macro MAIN() = takes(0) returns(0) {
-    
- }
+#define macro MAIN() = takes(0) returns(0) {
+    0x00 calldataload 0xE0 shr          // [func_sig]
+
+    __FUNC_SIG(makeContract) eq makeContract jumpi // jump to if func signature matches
+
+    0x00 dup1 revert
+
+    makeContract:
+        MAKE_CONTRACT()
+}
+
+// raw bytecode to execute up to contract creation
+// 74 6B620caffe60005260206000F3600052600C6014F3 60 00 52 60 15 60 00 60 00 F0
+
+#define macro MAKE_CONTRACT() = takes(0) returns(0) {
+
+    0x6B620caffe60005260206000F3600052600C6014F3 0x00 mstore // store code in memory
+
+    0x15 0x0B 0x00  // [value, offset, size]
+    create          // [address]
+
+    0x00 mstore 0x20 0x00 return
+}
+
+/*//////////////////////////////////////////////////////////////
+                            WORKING
+//////////////////////////////////////////////////////////////*/
+
+// #define macro RETURN_ANSWER() = takes(0) returns(0) {
+//     // return 0x00000000000000000000000000000000000000000000000000000000000caffe
+//     0xcaffe 0x00 mstore
+//     0x20 0x00 return
+
+//     // PUSH3 0caffe
+//     // PUSH1 00
+//     // MSTORE
+//     // PUSH1 20
+//     // PUSH1 00
+//     // RETURN
+
+//     // 62 0caffe
+//     // 60 00
+//     // 52
+//     // 60 20
+//     // 60 00
+//     // F3
+
+//     // 620caffe60005260206000F3
+// }
+
+// #define macro RETURN_CODE() = takes(0) returns(0) {
+//     // return 0x620caffe60005260206000F3
+//     0x620caffe60005260206000F3 0x00 mstore
+//     0x0C 0x00 return
+
+//     // PUSH12 620caffe60005260206000F3
+//     // PUSH1 00
+//     // MSTORE
+//     // PUSH1 0C
+//     // PUSH1 00
+//     // RETURN
+
+//     // 6B 620caffe60005260206000F3
+//     // 60 00
+//     // 52
+//     // 60 0C
+//     // 60 14
+//     // F3
+
+//     // 6B620caffe60005260206000F3600052600C6014F3
+// }

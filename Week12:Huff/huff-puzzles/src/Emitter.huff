@@ -13,5 +13,21 @@
 
 
  #define macro MAIN() = takes(0) returns(0) {
-    
+    0x00 calldataload 0xE0 shr          // [func_sig]
+
+    __FUNC_SIG(value) eq value jumpi // jump to if func signature matches
+
+    0x00 dup1 revert
+
+    value:
+        VALUE()
+ }
+
+ #define macro VALUE() = takes(0) returns(0) {
+    0x24 calldataload       // [num2]
+    0x00 mstore             // []
+    0x04 calldataload       // [num1]
+    __EVENT_HASH(Value)     // [sig, num1]
+    0x20 0x00               // [mem_offset, mem_size, sig, num1]
+    log2                    // []
  }

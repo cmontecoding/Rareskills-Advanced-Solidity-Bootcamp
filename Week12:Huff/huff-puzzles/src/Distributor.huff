@@ -1,4 +1,4 @@
- 
+
 /** 
  *  DISTRIBUTE HUFF EXERCISE
  *  
@@ -10,9 +10,62 @@
  *  NOTICE: The contract should revert when an unrecognized function is called
  */
 
- #define function distribute(address[]) payable returns()
+#define function distribute(address[]) payable returns()
 
+#define macro MAIN() = takes(0) returns(0) {
+    // Get the function selector
+    0x00 calldataload 0xE0 shr          // [func_sig]
 
- #define macro MAIN() = takes(0) returns(0) {
-   
- }
+    __FUNC_SIG(distribute) eq distribute jumpi // jump to distribute if func signature matches
+
+    0x00 dup1 revert // Revert if no match is found.
+
+    distribute:
+        DISTRIBUTE()
+}
+
+#define macro DISTRIBUTE() = takes(0) returns(0) {
+    0x24 calldataload       // [length]
+    callvalue               // [value, length]
+    div                     // [val]
+
+    0x00                    // [i = 0, val]
+
+    iteration:              // [i, val]
+        0x24 calldataload   // [length, i, val]
+        dup2                // [i, length, i, val]
+        eq finish jumpi     // [i, val]
+        GET_ADDRESS()       // [addr, i, val]
+        SEND_ETHER()        // [i, val]
+        0x01 add            // [i + 1, val]
+        iteration jump
+
+    finish:
+}
+
+#define macro GET_ADDRESS() = takes(0) returns(0) {
+    dup1                // [i, i, val]
+    0x20 mul            // [i * 32, i, val]
+    0x44 add            // [(i * 32) + 0x44, i, val]
+    calldataload        // [addr, i, val]
+}
+
+#define macro SEND_ETHER() = takes(0) returns(0) {
+                            // [addr, i, val]
+    0x00                    // [retSize, addr, i, val]
+    0x00                    // [retOffset, retSize, addr, i, val]
+    0x00                    // [argsSize, retOffset, retSize, addr, i, val]
+    0x00                    // [argsOffset, argsSize, retOffset, retSize, addr, i, val]
+    dup7                    // [value, argsOffset, argsSize, retOffset, retSize, addr, i, val]
+    dup6                    // [addr, value, argsOffset, argsSize, retOffset, retSize, addr, i, val]
+    gas                     // [gas, addr, value, argsOffset, argsSize, retOffset, retSize, addr, i, val]
+    call                    // [success, addr, i, val]
+    iszero txFailed jumpi   // [addr, i, val]
+    txSuccess jump          // [addr, i, val]
+
+    txFailed:
+        0x00 dup1 revert
+
+    txSuccess:
+        pop                 // [i, val]
+}

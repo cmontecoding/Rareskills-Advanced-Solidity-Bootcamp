@@ -15,15 +15,132 @@
  *  NOTICE: The contract should revert when an unrecognized function is called
  */
 
- #define function pushh(uint256 num) payable returns()
- #define function popp() payable returns()
- #define function read(uint256 index) payable returns(uint256)
- #define function length() payable returns(uint256)
- #define function write(uint256 index, uint256 num) payable returns()
+#define function pushh(uint256 num) payable returns()
+#define function popp() payable returns()
+#define function read(uint256 index) payable returns(uint256)
+#define function length() payable returns(uint256)
+#define function write(uint256 index, uint256 num) payable returns()
 
- #define error OutOfBounds()
- #define error ZeroArray()
+#define error OutOfBounds()
+#define error ZeroArray()
 
- #define macro MAIN() = takes(0) returns(0) {
-    
- }
+#define macro MAIN() = takes(0) returns(0) {
+    // Get the function selector
+    0x00 calldataload 0xE0 shr          // [func_sig]
+
+    dup1 __FUNC_SIG(pushh) eq pushh jumpi // jump to if func signature matches
+    dup1 __FUNC_SIG(popp) eq popp jumpi // jump to if func signature matches
+    dup1 __FUNC_SIG(read) eq read jumpi // jump to if func signature matches
+    dup1 __FUNC_SIG(length) eq length jumpi // jump to if func signature matches
+    __FUNC_SIG(write) eq write jumpi // jump to if func signature matches
+
+    0x00 dup1 revert // Revert if no match is found.
+
+    pushh:
+        PUSHH()
+
+    popp:
+        POPP()
+
+    read:
+        READ()
+
+    length:
+        LENGTH()
+
+    write:
+        WRITE()
+}
+
+#define macro PUSHH() = takes(0) returns(0) {
+    pop
+    0x04 calldataload       // [num]
+    GET_LENGTH()            // [length, num]
+    0x01 add                // [length + 1, num]
+    dup1                    // [length + 1, length + 1, num]
+
+    swap2                   // [num, length + 1, length + 1]
+    swap1                   // [length + 1, num, length + 1]
+    sstore                  // [length + 1]
+    0x00                    // [0, length + 1]
+    sstore
+
+    0x00 0x00 return      // return
+}
+
+#define macro POPP() = takes(0) returns(0) {
+    pop // remove function sig
+    0x00                    // [0]
+    GET_LENGTH()            // [length, 0]
+    dup1                    // [length, length, 0]
+    iszero failure jumpi    // [length, 0]
+    success jump
+
+    failure:
+        ZERO_ARRAY()
+
+    success:
+        0x01                // [1, length, 0]
+        dup2                // [length, 1, length, 0]
+        sub                 // [length - 1, length, 0]
+        0x00 sstore         // [length, 0]
+        0x01 add            // [length + 1, 0]
+        sstore
+        0x00 0x00 return
+}
+
+#define macro READ() = takes(0) returns(0) {
+    pop // remove function sig
+    0x04 calldataload       // [index]
+    dup1                    // [index, index]
+    GET_LENGTH()            // [length, index, index]
+    swap1                   // [index, length, index]
+    lt                      // [index < length, index]
+    valid jumpi             // [index]
+
+    OUT_OF_BOUNDS()
+
+    valid:
+        0x01 add            // [index + 1]
+        sload               // [value]
+        0x00 mstore         // []
+        0x20 0x00 return
+}
+
+#define macro LENGTH() = takes(0) returns(0) {
+    pop // remove function sig
+    GET_LENGTH()
+    0x00 mstore
+    0x20 0x00 return
+}
+
+#define macro WRITE() = takes(0) returns(0) {
+    GET_LENGTH()            // [length]
+    0x04 calldataload       // [i, length]
+    lt                      // [i < length]
+    valid jumpi             // []
+
+    OUT_OF_BOUNDS()
+
+    valid:
+        0x24 calldataload       // [num]
+        0x04 calldataload       // [i, num]
+        0x01 add                // [i + 1, num]
+        sstore
+}
+
+#define macro GET_LENGTH() = takes(0) returns(0) {
+    0x00 sload
+}
+
+#define macro ZERO_ARRAY() = takes(0) returns(0) {
+    __ERROR(ZeroArray)
+    0x00 mstore
+    0x04 0x00 revert
+}
+
+#define macro OUT_OF_BOUNDS() = takes(0) returns(0) {
+    __ERROR(OutOfBounds)
+    0x00 mstore
+    0x04 0x00 revert
+}

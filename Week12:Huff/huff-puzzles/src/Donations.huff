@@ -8,5 +8,44 @@
 #define function donated(address) payable returns(uint256)
 
 #define macro MAIN() = takes(0) returns(0) {
-    
+    // Get the function selector
+    0x00 calldataload 0xE0 shr              // [func_sig]
+
+    __FUNC_SIG(donated) eq donated jumpi    // jump to if func signature matches
+    receive jump
+
+    donated:
+        DONATED()
+
+    receive:
+        RECEIVE()
+}
+
+#define macro DONATED() = takes(0) returns(0) {
+    0x04 calldataload       // load address from calldata
+    0x00 mstore             // store it in memory
+
+    0x20 0x00 sha3          // [hash]
+    sload                   // [value]
+
+    0x00 mstore             // place the result in memory
+    0x20 0x00 return        // return the result
+}
+    // 0x00 mstore 0x20 0x00 return
+
+#define macro RECEIVE() = takes(0) returns(0) {
+    0x00 0x00 calldataload eq noCalldata jumpi // if no calldata jump past revert
+
+    0x00 dup1 revert
+
+    noCalldata:
+        caller 0x00 mstore              // store caller address in memory []
+        0x20 0x00                       // [offset 0x00, size 0x20]
+        sha3                            // [hash]
+        dup1                            // [hash, hash]
+        sload                           // [storedValue, hash]
+        callvalue                       // [value, storedValue, hash]
+        add                             // [newValue, hash]
+        swap1                           // [hash, newValue]
+        sstore                          // []
 }

@@ -12,5 +12,32 @@
 
 
  #define macro MAIN() = takes(0) returns(0) {
-    
+    returndatasize calldataload
+    0xE0 shr
+    __FUNC_SIG(sendEther) eq send jumpi
+
+    // if function doesnt match, revert
+    invalid
+
+    send:
+        SEND_ETHER()
+ }
+
+ #define macro SEND_ETHER() = takes(0) returns(0) {
+    // store callvalue
+    callvalue 0x00 mstore
+
+    // get address argument
+    0x04 calldataload
+
+    0x00    //empty data
+    0x00    //empty data
+    0x00    //empty data
+    0x00    //empty data
+
+    0x00 mload // get callvalue from memory
+    dup6 // bring address to top of stack
+
+    0xFFFF //gas amount
+    call
  }

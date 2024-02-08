@@ -12,5 +12,91 @@
 #define function withdraw(uint256) payable returns()
 
 #define macro MAIN() = takes(0) returns(0) {
+    // Get the function selector
+    0x00 calldataload 0xE0 shr              // [func_sig]
 
+    dup1 __FUNC_SIG(balanceOf) eq balanceOf jumpi    // jump to if func signature matches
+    __FUNC_SIG(withdraw) eq withdraw jumpi    // jump to if func signature matches
+    receive jump
+
+    balanceOf:
+        BALANCE()
+
+    withdraw:
+        WITHDRAW()
+
+    receive:
+        RECEIVE()
+}
+
+#define macro BALANCE() = takes(0) returns(0) {
+    0x04 calldataload       // load address from calldata
+    0x00 mstore             // store it in memory
+
+    0x20 0x00 sha3          // [hash]
+    sload                   // [value]
+
+    0x00 mstore             // place the result in memory
+    0x20 0x00 return        // return the result
+}
+
+#define macro WITHDRAW() = takes(0) returns(0) {
+    caller                  // load address from calldata
+    0x00 mstore             // store it in memory
+
+    0x20 0x00 sha3          // [hash]
+    dup1                    // [hash, hash]
+    sload                   // [value, hash]
+    dup1                    // [value, value, hash]
+    0x04 calldataload       // [toWithdraw, value, value, hash]
+    gt                      // [toWithdraw > value, value, hash]
+    insufficientFunds jumpi // revert if too much
+    sufficientFunds jump
+
+    insufficientFunds:
+        0x00 dup1 revert
+
+    sufficientFunds:
+        RETURN_FUNDS()
+}
+
+
+#define macro RETURN_FUNDS() = takes(0) returns(0) {
+    0x00                    // [retSize, value, hash]
+    0x00                    // [retOffset, retSize, value, hash]
+    0x00                    // [argsSize, retOffset, retSize, value, hash]
+    0x00                    // [argsOffset, argsSize, retOffset, retSize, value, hash]
+    0x04 calldataload       // [value, argsOffset, argsSize, retOffset, retSize, value, hash]
+    caller                  // [address, value, argsOffset, argsSize, retOffset, retSize, value, hash]
+    gas                     // [gas, address, value, argsOffset, argsSize, retOffset, retSize, value, hash]
+    call                    // [success, value, hash]
+    iszero txFailed jumpi   // [value, hash]
+
+    0x04 calldataload       // [toWithdraw, value, hash]
+    swap1                   // [value, toWithdraw, hash]
+    sub                     // [remaining, hash]
+    swap1                   // [hash, remaining]
+    sstore
+
+    0x00 0x00 return
+
+    txFailed:
+        0x00 dup1 revert
+}
+
+#define macro RECEIVE() = takes(0) returns(0) {
+    0x00 0x00 calldataload eq noCalldata jumpi // if no calldata jump past revert
+
+    0x00 dup1 revert
+
+    noCalldata:
+        caller 0x00 mstore              // store caller address in memory []
+        0x20 0x00                       // [offset 0x00, size 0x20]
+        sha3                            // [hash]
+        dup1                            // [hash, hash]
+        sload                           // [storedValue, hash]
+        callvalue                       // [value, storedValue, hash]
+        add                             // [newValue, hash]
+        swap1                           // [hash, newValue]
+        sstore                          // []
 }
