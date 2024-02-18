@@ -1,14 +1,28 @@
 object "ERC1155" {
+    /*//////////////////////////////////////////////////////////////
+                              CONSTRUCTOR
+    //////////////////////////////////////////////////////////////*/
     code {
         datacopy(0, dataoffset("Runtime"), datasize("Runtime"))
         return(0, datasize("Runtime"))
     }
+
+    /*//////////////////////////////////////////////////////////////
+                                RUNTIME
+    //////////////////////////////////////////////////////////////*/
     object "Runtime" {
         code {
             //Dispatcher
             switch getSelector()
             case 0x731133e9 /* mint(address,uint256,uint256,bytes) */ {
-                //_mint(decodeAddress(0), decodeUint(1), decodeUint(2), decodeUint(3))
+                let account := decodeAddress(0)
+                let id := decodeUint(1)
+                let amount := decodeUint(2)
+                let dataOffset := decodeUint(3)
+
+                _mint(account, id, amount, dataOffset)
+
+                // emitTransferSingle(caller(), zeroAddress(), to, id, amount)
             }
             case 0xb48ab8b6 /* batchMint(address,uint256[],uint256[],bytes) */{
 
@@ -47,7 +61,7 @@ object "ERC1155" {
                     revert(0, 0)
                 }
                 addBalance(account, id, amount)
-                //checkERC1155Received(caller(), 0x0, account, id, amount, dataOffset)
+                checkERC1155Received(caller(), 0x0, account, id, amount, dataOffset)
             }
 
             function addBalance(account, id, amount) {
@@ -55,6 +69,52 @@ object "ERC1155" {
                 let storageLocation := getBalanceStorageLocation(account, id)
                 sstore(storageLocation, add(currentBalance, amount))
             }
+
+            function getBalanceStorageLocation(account, id) -> loc {
+                let currentBalance := balanceOf(account, id)
+                let offset := getFreeMemoryPointer()
+                storeInMemory(account)
+                storeInMemory(id)
+                loc := keccak256(offset, 0x40)
+            }
+            
+            function checkERC1155Received(operator, from, to, id, amount, dataOffset) {
+            let size := extcodesize(to)
+            if gt(size, 0) {
+                // onERC1155Received(address,address,uint256,uint256,bytes)
+                let onERC1155ReceivedSelector := 0xf23a6e6100000000000000000000000000000000000000000000000000000000
+
+                // abi encode arguments
+                let offset := getFreeMemoryPointer()
+                mstore(offset, onERC1155ReceivedSelector) // selector
+                mstore(add(offset, 0x04), operator)       // operator
+                mstore(add(offset, 0x24), from)           // from
+                mstore(add(offset, 0x44), id)             // id
+                mstore(add(offset, 0x64), amount)         // amount
+                mstore(add(offset, 0x84), 0xa0)           // data
+
+                let endPtr := copyBytesToMemory(add(offset, 0xa4), dataOffset) // Copies 'data' to memory
+                setFreeMemoryPointer(endPtr)
+
+                let argsOffset := offset
+                let argsBytes := 0xa4
+                let returnOffset := 0
+                let returnBytes := 0x20
+                // call(gas, address, argsOffset, argsSize, retOffset, retSize)
+                let success := call(
+                gas(), to, 0, offset, sub(endPtr, offset), 0x00, 0x04
+                )
+                if iszero(success) {
+                revert(0, 0)
+                }
+
+                checkReturnValueIs(onERC1155ReceivedSelector)
+            }
+            }
+
+            /*//////////////////////////////////////////////////////////////
+                                VIEW FUNCTIONS
+            //////////////////////////////////////////////////////////////*/
 
             function balanceOf(account, id) -> b {
                 mstore(0x00, account)
@@ -80,6 +140,62 @@ object "ERC1155" {
             function decodeUint(offset) -> v {
                 let pos := add(4, mul(offset, 0x20))
                 v := calldataload(pos)
+            }
+
+            /*//////////////////////////////////////////////////////////////
+                                MEMORY MANAGEMENT
+            //////////////////////////////////////////////////////////////*/
+
+            function copyBytesToMemory(mptr, dataOffset) -> newMptr {
+            let dataLenOffset := add(dataOffset, 4)
+            let dataLen := calldataload(dataLenOffset)
+
+            let totalLen := add(0x20, dataLen) // dataLen+data
+            let rem := mod(dataLen, 0x20)
+            if rem {
+                totalLen := add(totalLen, sub(0x20, rem))
+            }
+            calldatacopy(mptr, dataLenOffset, totalLen)
+
+            newMptr := add(mptr, totalLen)
+            }
+
+            function copyArrayToMemory(mptr, arrOffset) -> newMptr {
+            let arrLenOffset := add(arrOffset, 4)
+            let arrLen := calldataload(arrLenOffset)
+            let totalLen := add(0x20, mul(arrLen, 0x20)) // len+arrData
+            calldatacopy(mptr, arrLenOffset, totalLen) // copy len+data to mptr
+
+            newMptr := add(mptr, totalLen)
+            }
+
+            function storeInMemory(value) {
+            let offset := getFreeMemoryPointer()
+            mstore(offset, value)
+            setFreeMemoryPointer(add(offset, 0x20))
+            }
+
+            function getFreeMemoryPointer() -> p {
+            p := mload(0x40)
+            }
+
+            function setFreeMemoryPointer(newPos) {
+            mstore(0x40, newPos)
+            }
+
+            function initializeFreeMemoryPointer() {
+            mstore(0x40, 0x80)
+            }
+
+            function checkReturnValueIs(expected) {
+            let mptr := getFreeMemoryPointer()
+            returndatacopy(mptr, 0x00, returndatasize())
+            setFreeMemoryPointer(add(mptr, calldatasize()))
+            let returnVal := mload(mptr)
+            // revert if incorrect value is returned
+            if iszero(eq(expected, returnVal)) {
+                revert(0, 0)
+            }
             }
 
         }
