@@ -44,7 +44,13 @@ object "ERC1155" {
                 // emitTransferSingle(caller(), from, zeroAddress(), id, amount)
             }
             case 0xf6eb127a /* burnBatch(address,uint256[],uint256[]) */ {
+                let account := decodeAddress(0)
+                let id := decodeUint(1)
+                let amount := decodeUint(2)
 
+                burnBatch(account, id, amount)
+
+                // emitTransferBatch(caller(), from, zeroAddress(), posIds, posAmounts)
             }
             case 0x00fdd58e /* "balanceOf(address,uint256)" */ {
                 //returnUint(balanceOf(decodeAddress(0), decodeUint(1)))
@@ -107,6 +113,38 @@ object "ERC1155" {
                     revert(0, 0)
                 }
                 subBalance(account, id, amount)
+            }
+
+            function burnBatch(from, idsOffset, amountsOffset) {
+            if iszero(from) {
+                revert(0, 0)
+            }
+
+            let idsLen := decodeUint(div(idsOffset, 0x20))
+            let amountsLen := decodeUint(div(amountsOffset, 0x20))
+
+            // array lenghts must match
+            if iszero(eq(idsLen, amountsLen)) {
+                revert(0, 0)
+            }
+
+            let operator := caller()
+
+            let idsStartPtr := add(idsOffset, 0x24)
+            let amountsStartPtr := add(amountsOffset, 0x24)
+
+            for { let i:= 0 } lt(i, idsLen) { i := add(i, 1)}
+            {
+                let id := calldataload(add(idsStartPtr, mul(0x20, i)))
+                let amount := calldataload(add(amountsStartPtr, mul(0x20, i)))
+
+                let fromBalance := balanceOf(from, id)
+
+                if lt(fromBalance, amount) {
+                    revert(0, 0)
+                }
+                subBalance(from, id, amount)
+            }
             }
 
             function subBalance(account, id, amount) {
