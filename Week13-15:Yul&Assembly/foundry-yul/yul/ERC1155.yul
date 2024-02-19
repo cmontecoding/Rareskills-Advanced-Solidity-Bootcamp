@@ -35,7 +35,13 @@ object "ERC1155" {
                 // emitTransferBatch(caller(), zeroAddress(), to, posIds, posAmounts)
             }
             case 0xf5298aca /* burn(address,uint256,uint256) */ {
-            
+                let account := decodeAddress(0)
+                let id := decodeUint(1)
+                let amount := decodeUint(2)
+
+                burn(account, id, amount)
+
+                // emitTransferSingle(caller(), from, zeroAddress(), id, amount)
             }
             case 0xf6eb127a /* burnBatch(address,uint256[],uint256[]) */ {
 
@@ -92,6 +98,21 @@ object "ERC1155" {
                 }
 
                 checkERC1155ReceivedBatch(operator, 0, to, idsOffset, amountsOffset, dataOffset)
+            }
+
+            function burn(account, id, amount) {
+                let val := balanceOf(account, id)
+                // revert if insufficient balance
+                if gt(amount, val) {
+                    revert(0, 0)
+                }
+                subBalance(account, id, amount)
+            }
+
+            function subBalance(account, id, amount) {
+                let currentBalance := balanceOf(account, id)
+                let storageLocation := getBalanceStorageLocation(account, id)
+                sstore(storageLocation, sub(currentBalance, amount))
             }
 
             function addBalance(account, id, amount) {
