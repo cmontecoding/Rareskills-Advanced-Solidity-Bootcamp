@@ -25,7 +25,14 @@ object "ERC1155" {
                 // emitTransferSingle(caller(), zeroAddress(), to, id, amount)
             }
             case 0xb48ab8b6 /* batchMint(address,uint256[],uint256[],bytes) */{
+                let account := decodeAddress(0)
+                let idsOffset := decodeUint(1)
+                let amountsOffset := decodeUint(2)
+                let dataOffset := decodeUint(3)
 
+                _mintBatch(account, idsOffset, amountsOffset, dataOffset)
+
+                // emitTransferBatch(caller(), zeroAddress(), to, posIds, posAmounts)
             }
             case 0xf5298aca /* burn(address,uint256,uint256) */ {
             
@@ -62,6 +69,29 @@ object "ERC1155" {
                 }
                 addBalance(account, id, amount)
                 checkERC1155Received(caller(), 0x0, account, id, amount, dataOffset)
+            }
+
+            function _mintBatch(to, idsOffset, amountsOffset, dataOffset) {
+                let idsLen := decodeUint(div(idsOffset, 0x20))
+                let amountsLen := decodeUint(div(amountsOffset, 0x20))
+                // checks array lengths match
+                if iszero(eq(idsLen, amountsLen)) {
+                    revert(0, 0)
+                }
+
+                let operator := caller()
+
+                let idsStartPtr := add(idsOffset, 0x24)
+                let amountsStartPtr := add(amountsOffset, 0x24)
+
+                for { let i := 0 } lt(i, idsLen) { i := add(i, 1)}
+                {
+                    let id := calldataload(add(idsStartPtr, mul(0x20, i)))
+                    let amount := calldataload(add(amountsStartPtr, mul(0x20, i)))
+                    addBalance(to, id, amount)
+                }
+
+                checkERC1155ReceivedBatch(operator, 0, to, idsOffset, amountsOffset, dataOffset)
             }
 
             function addBalance(account, id, amount) {
@@ -109,6 +139,47 @@ object "ERC1155" {
                 }
 
                 checkReturnValueIs(onERC1155ReceivedSelector)
+            }
+            }
+
+            function checkERC1155ReceivedBatch(operator, from, to, idsOffset, amountsOffset, dataOffset) {
+            if gt(extcodesize(to), 0) {
+                /* onERC1155BatchReceived(address,address,uint256[],uint256[],bytes) */
+                let onERC1155BatchReceivedSelector := 0xbc197c8100000000000000000000000000000000000000000000000000000000
+
+                /* call onERC1155BatchReceived(operator, from, ids, amounts, data) */
+                let oldMptr := mload(0x40)
+                let mptr := oldMptr
+
+                mstore(mptr, onERC1155BatchReceivedSelector)
+                mstore(add(mptr, 0x04), operator)
+                mstore(add(mptr, 0x24), from)
+                mstore(add(mptr, 0x44), 0xa0)   // ids offset
+
+                // mptr+0x44: idsOffset
+                // mptr+0x64: amountsOffset
+                // mptr+0x84: dataOffset
+                // mptr+0xa4~: ids, amounts, data
+
+                let amountsPtr := copyArrayToMemory(add(mptr, 0xa4), idsOffset) // copy ids to memory
+
+                mstore(add(mptr, 0x64), sub(sub(amountsPtr, oldMptr), 4)) // amountsOffset
+                let dataPtr := copyArrayToMemory(amountsPtr, amountsOffset) // copy amounts to memory
+
+                mstore(add(mptr, 0x84), sub(sub(dataPtr, oldMptr), 4))       // dataOffset
+                let endPtr := copyBytesToMemory(dataPtr, dataOffset)  // copy data to memory
+                mstore(0x40, endPtr)
+
+                // reverts if call fails
+                mstore(0x00, 0) // clear memory
+                let success := call(
+                    gas(), to, 0, oldMptr, sub(endPtr, oldMptr), 0x00, 0x04
+                )
+                if iszero(success) {
+                    revert(0, 0)
+                }
+
+                checkReturnValueIs(onERC1155BatchReceivedSelector)
             }
             }
 
