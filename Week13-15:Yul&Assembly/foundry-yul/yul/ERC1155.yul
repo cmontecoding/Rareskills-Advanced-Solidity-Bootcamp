@@ -53,7 +53,7 @@ object "ERC1155" {
                 // emitTransferBatch(caller(), from, zeroAddress(), posIds, posAmounts)
             }
             case 0x00fdd58e /* "balanceOf(address,uint256)" */ {
-                //returnUint(balanceOf(decodeAddress(0), decodeUint(1)))
+                returnUint(balanceOf(decodeAddress(0), decodeUint(1)))
             }
             case 0x4e1273f4 /* "balanceOfBatch(address[],uint256[])" */ {
 
@@ -270,6 +270,22 @@ object "ERC1155" {
             function decodeUint(offset) -> v {
                 let pos := add(4, mul(offset, 0x20))
                 v := calldataload(pos)
+            }
+
+            /*//////////////////////////////////////////////////////////////
+                                        ENCODING
+            //////////////////////////////////////////////////////////////*/
+
+            function returnUint(v) {
+            mstore(0, v)
+            return(0, 0x20)
+            }
+
+            function returnArray(mptr) {
+            let offset := mload(mptr)
+            let len := mload(add(mptr, offset))
+            let numBytes := add(mul(len, 0x20), 0x40)
+            return(mptr, numBytes)
             }
 
             /*//////////////////////////////////////////////////////////////
