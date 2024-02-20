@@ -56,7 +56,8 @@ object "ERC1155" {
                 returnUint(balanceOf(decodeAddress(0), decodeUint(1)))
             }
             case 0x4e1273f4 /* "balanceOfBatch(address[],uint256[])" */ {
-
+                //returnArray(balanceOfBatch(decodeAddress(0), decodeUint(1)))
+                returnArray(balanceOfBatch(decodeUint(0), decodeUint(1)))
             }
             case 0xf242432a /* "safeTransferFrom(address,address,uint256,uint256,bytes)" */ {
 
@@ -252,7 +253,39 @@ object "ERC1155" {
                 b := sload(keccak256(0x00, 0x40))
             }
 
-            /* ---------- calldata decoding functions ----------- */
+            function balanceOfBatch(accountsOffset, idsOffset) -> balancesPtr {
+            balancesPtr := getFreeMemoryPointer()
+
+            let accountsLen := decodeUint(div(accountsOffset, 0x20))
+            let idsLen := decodeUint(div(idsOffset, 0x20))
+
+            // array lengths must match
+            if iszero(eq(accountsLen, idsLen)) {
+                revert(0,0)
+            }
+
+            storeInMemory(0x20) // array offset
+            storeInMemory(accountsLen) // array length
+
+            for { let i := 0 } lt(i, accountsLen) { i := add(i, 1) } {
+                let account := decodeElementAtIndex(accountsOffset, i)
+                let id := decodeElementAtIndex(idsOffset, i)
+                let val := balanceOf(account, id)
+                storeInMemory(val)
+            }
+            }
+
+            /*//////////////////////////////////////////////////////////////
+                                    ABI DECODING
+            //////////////////////////////////////////////////////////////*/
+
+            function decodeElementAtIndex(arrayOffset, index) -> element {
+            let lengthOffset := add(4, arrayOffset)
+            let firstElementOffset := add(lengthOffset, 0x20)
+            let elementOffset := add(firstElementOffset, mul(index, 0x20))
+            element := calldataload(elementOffset)
+            }
+
             function getSelector() -> s {
                 // copy first 4 bytes from calldata
                 // we do this by loading 32 bytes from calldata starting at position 0
