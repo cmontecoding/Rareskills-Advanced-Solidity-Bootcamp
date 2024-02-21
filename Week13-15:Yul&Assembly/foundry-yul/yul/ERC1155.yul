@@ -83,10 +83,18 @@ object "ERC1155" {
 
             }
             case 0xa22cb465 /* "setApprovalForAll(address,bool)" */ {
+                let operator := decodeAddress(0)
+                let approved := decodeUint(1)
 
+                setApprovalForAll(operator, approved)
+
+                //emitApprovalForAll(_owner, operator, approved)
             }
             case 0xe985e9c5 /* "isApprovedForAll(address,address)" */ {
+                let account := decodeAddress(0)
+                let operator := decodeAddress(1)
 
+                returnUint(isApprovedForAll(account, operator))
             }
             default {
                 revert(0, 0)
@@ -199,6 +207,11 @@ object "ERC1155" {
             checkERC1155ReceivedBatch(caller(), from, to, idsOffset, amountsOffset, dataOffset)
             }
 
+            function setApprovalForAll(operator, approved) {
+            let slot := getOperatorApprovedSlot(caller(), operator)
+            sstore(slot, approved)
+            }
+
             function subBalance(account, id, amount) {
                 let currentBalance := balanceOf(account, id)
                 let storageLocation := getBalanceStorageLocation(account, id)
@@ -227,6 +240,13 @@ object "ERC1155" {
                 storeInMemory(account)
                 storeInMemory(id)
                 loc := keccak256(offset, 0x40)
+            }
+
+            function getOperatorApprovedSlot(account, operator) -> slot {
+            let offset := getFreeMemoryPointer()
+            storeInMemory(account)
+            storeInMemory(operator)
+            slot := keccak256(offset, 0x40)
             }
             
             function checkERC1155Received(operator, from, to, id, amount, dataOffset) {
@@ -307,6 +327,11 @@ object "ERC1155" {
             /*//////////////////////////////////////////////////////////////
                                 VIEW FUNCTIONS
             //////////////////////////////////////////////////////////////*/
+
+            function isApprovedForAll(account, operator) -> approved {
+            let slot := getOperatorApprovedSlot(account, operator)
+            approved := sload(slot)
+            }
 
             function balanceOf(account, id) -> b {
                 mstore(0x00, account)
