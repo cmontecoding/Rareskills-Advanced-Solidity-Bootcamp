@@ -12,6 +12,8 @@ object "ERC1155" {
     //////////////////////////////////////////////////////////////*/
     object "Runtime" {
         code {
+            initializeFreeMemoryPointer()
+
             //Dispatcher
             switch getSelector()
             case 0x731133e9 /* mint(address,uint256,uint256,bytes) */ {
@@ -30,7 +32,7 @@ object "ERC1155" {
                 let amountsOffset := decodeUint(2)
                 let dataOffset := decodeUint(3)
 
-                _mintBatch(account, idsOffset, amountsOffset, dataOffset)
+                batchMint(account, idsOffset, amountsOffset, dataOffset)
 
                 // emitTransferBatch(caller(), zeroAddress(), to, posIds, posAmounts)
             }
@@ -48,16 +50,21 @@ object "ERC1155" {
                 let id := decodeUint(1)
                 let amount := decodeUint(2)
 
-                burnBatch(account, id, amount)
+                batchBurn(account, id, amount)
 
                 // emitTransferBatch(caller(), from, zeroAddress(), posIds, posAmounts)
             }
             case 0x00fdd58e /* "balanceOf(address,uint256)" */ {
-                returnUint(balanceOf(decodeAddress(0), decodeUint(1)))
+                let account := decodeAddress(0)
+                let id := decodeUint(1)
+
+                returnUint(balanceOf(account, id))
             }
             case 0x4e1273f4 /* "balanceOfBatch(address[],uint256[])" */ {
-                //returnArray(balanceOfBatch(decodeAddress(0), decodeUint(1)))
-                returnArray(balanceOfBatch(decodeUint(0), decodeUint(1)))
+                let accountsOffset := decodeUint(0)
+                let idsOffset := decodeUint(1)
+
+                returnArray(balanceOfBatch(accountsOffset, idsOffset))
             }
             case 0xf242432a /* "safeTransferFrom(address,address,uint256,uint256,bytes)" */ {
                 let from := decodeAddress(0)
@@ -109,7 +116,11 @@ object "ERC1155" {
                 checkERC1155Received(caller(), 0x0, account, id, amount, dataOffset)
             }
 
-            function _mintBatch(to, idsOffset, amountsOffset, dataOffset) {
+            function batchMint(to, idsOffset, amountsOffset, dataOffset) {
+                if iszero(to) {
+                    revert(0, 0)
+                }
+                
                 let idsLen := decodeUint(div(idsOffset, 0x20))
                 let amountsLen := decodeUint(div(amountsOffset, 0x20))
                 // checks array lengths match
@@ -141,7 +152,7 @@ object "ERC1155" {
                 subBalance(account, id, amount)
             }
 
-            function burnBatch(from, idsOffset, amountsOffset) {
+            function batchBurn(from, idsOffset, amountsOffset) {
             if iszero(from) {
                 revert(0, 0)
             }
