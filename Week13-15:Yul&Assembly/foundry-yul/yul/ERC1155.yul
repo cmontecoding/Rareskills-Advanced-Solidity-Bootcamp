@@ -60,9 +60,26 @@ object "ERC1155" {
                 returnArray(balanceOfBatch(decodeUint(0), decodeUint(1)))
             }
             case 0xf242432a /* "safeTransferFrom(address,address,uint256,uint256,bytes)" */ {
+                let from := decodeAddress(0)
+                let to := decodeAddress(1)
+                let id := decodeUint(2)
+                let amount := decodeUint(3)
+                let dataOffset := decodeUint(4)
 
+                safeTransferFrom(from, to, id, amount, dataOffset)
+
+                //emitTransferSingle(caller(), from, to, id, amount)
             }
             case 0x2eb2c2d6 /* "safeBatchTransferFrom(address,address,uint256[],uint256[],bytes)" */ {
+                let from := decodeAddress(0)
+                let to := decodeAddress(1)
+                let idsOffset := decodeUint(2)
+                let amountsOffset := decodeUint(3)
+                let dataOffset := decodeUint(4)
+
+                safeBatchTransferFrom(from, to, idsOffset, amountsOffset, dataOffset)
+
+                //emitTransferBatch(caller(), from, to, posIds, posAmounts)
 
             }
             case 0xa22cb465 /* "setApprovalForAll(address,bool)" */ {
@@ -148,6 +165,40 @@ object "ERC1155" {
             }
             }
 
+            function safeTransferFrom(from, to, id, amount, dataOffset) {
+            // don't allow sending to zero address
+            if iszero(to) {
+                revert(0, 0)
+            }
+
+            transferTokens(from, to, id, amount)
+
+            checkERC1155Received(caller(), from, to, id, amount, dataOffset) 
+            }
+
+            function safeBatchTransferFrom(from, to, idsOffset, amountsOffset, dataOffset) {
+            // don't allow sending to zero address
+            if iszero(to) {
+                revert(0, 0)
+            }
+
+            let idsLen := decodeUint(div(idsOffset, 0x20))
+            let amountsLen := decodeUint(div(amountsOffset, 0x20))
+
+            // check lengths are the same
+            if iszero(eq(idsLen, amountsLen)) {
+                revert(0, 0)
+            }
+
+            for { let i := 0 } lt(i, idsLen) { i := add(i, 1) } {
+                let id := decodeElementAtIndex(idsOffset, i)
+                let amount := decodeElementAtIndex(amountsOffset, i)
+                transferTokens(from, to, id, amount)
+            }
+
+            checkERC1155ReceivedBatch(caller(), from, to, idsOffset, amountsOffset, dataOffset)
+            }
+
             function subBalance(account, id, amount) {
                 let currentBalance := balanceOf(account, id)
                 let storageLocation := getBalanceStorageLocation(account, id)
@@ -158,6 +209,16 @@ object "ERC1155" {
                 let currentBalance := balanceOf(account, id)
                 let storageLocation := getBalanceStorageLocation(account, id)
                 sstore(storageLocation, add(currentBalance, amount))
+            }
+
+            function transferTokens(from, to, id, amount) {
+                let val := balanceOf(from, id)
+                // revert if insufficient balance
+                if gt(amount, val) {
+                revert(0, 0)
+                }
+                subBalance(from, id, amount)
+                addBalance(to, id, amount)
             }
 
             function getBalanceStorageLocation(account, id) -> loc {
