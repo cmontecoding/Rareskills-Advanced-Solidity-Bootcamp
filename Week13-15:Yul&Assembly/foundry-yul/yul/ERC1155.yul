@@ -24,7 +24,7 @@ object "ERC1155" {
 
                 _mint(account, id, amount, dataOffset)
 
-                // emitTransferSingle(caller(), zeroAddress(), to, id, amount)
+                emitTransferSingle(caller(), zeroAddress(), account, id, amount)
             }
             case 0xb48ab8b6 /* batchMint(address,uint256[],uint256[],bytes) */{
                 let account := decodeAddress(0)
@@ -34,7 +34,7 @@ object "ERC1155" {
 
                 batchMint(account, idsOffset, amountsOffset, dataOffset)
 
-                // emitTransferBatch(caller(), zeroAddress(), to, posIds, posAmounts)
+                emitTransferBatch(caller(), zeroAddress(), account, idsOffset, amountsOffset)
             }
             case 0xf5298aca /* burn(address,uint256,uint256) */ {
                 let account := decodeAddress(0)
@@ -43,16 +43,16 @@ object "ERC1155" {
 
                 burn(account, id, amount)
 
-                // emitTransferSingle(caller(), from, zeroAddress(), id, amount)
+                emitTransferSingle(caller(), account, zeroAddress(), id, amount)
             }
             case 0xf6eb127a /* burnBatch(address,uint256[],uint256[]) */ {
                 let account := decodeAddress(0)
-                let id := decodeUint(1)
-                let amount := decodeUint(2)
+                let idsOffset := decodeUint(1)
+                let amountsOffset := decodeUint(2)
 
-                batchBurn(account, id, amount)
+                batchBurn(account, idsOffset, amountsOffset)
 
-                // emitTransferBatch(caller(), from, zeroAddress(), posIds, posAmounts)
+                emitTransferBatch(caller(), account, zeroAddress(), idsOffset, amountsOffset)
             }
             case 0x00fdd58e /* "balanceOf(address,uint256)" */ {
                 let account := decodeAddress(0)
@@ -75,7 +75,7 @@ object "ERC1155" {
 
                 safeTransferFrom(from, to, id, amount, dataOffset)
 
-                //emitTransferSingle(caller(), from, to, id, amount)
+                emitTransferSingle(caller(), from, to, id, amount)
             }
             case 0x2eb2c2d6 /* "safeBatchTransferFrom(address,address,uint256[],uint256[],bytes)" */ {
                 let from := decodeAddress(0)
@@ -86,7 +86,7 @@ object "ERC1155" {
 
                 safeBatchTransferFrom(from, to, idsOffset, amountsOffset, dataOffset)
 
-                //emitTransferBatch(caller(), from, to, posIds, posAmounts)
+                emitTransferBatch(caller(), from, to, idsOffset, amountsOffset)
 
             }
             case 0xa22cb465 /* "setApprovalForAll(address,bool)" */ {
@@ -95,7 +95,7 @@ object "ERC1155" {
 
                 setApprovalForAll(operator, approved)
 
-                //emitApprovalForAll(_owner, operator, approved)
+                emitApprovalForAll(caller(), operator, approved)
             }
             case 0xe985e9c5 /* "isApprovedForAll(address,address)" */ {
                 let account := decodeAddress(0)
@@ -105,6 +105,60 @@ object "ERC1155" {
             }
             default {
                 revert(0, 0)
+            }
+
+            /**
+             * =============================================
+             * EVENTS
+             * =============================================
+             */
+            /// @dev TransferSingle(operator, from, to, id, amount)
+            function emitTransferSingle(operator, from, to, id, amount) {
+                let signatureHash := 0xc3d58168c5ae7397731d063d5bbf3d657854427343f4c083240f7aacaa2d0f62
+                // store the non-indexed data in memory to emit
+                mstore(0x00, id)
+                mstore(0x20, amount)
+
+                log4(0x00, 0x40, signatureHash, operator, from, to)
+            }
+
+            /// @dev TransferBatch(operator, from, to, ids, amounts)
+            function emitTransferBatch(operator, from, to, posIds, posAmounts) {
+                let signatureHash := 0x4a39dc06d4c0dbc64b70af90fd698a233a518aa5d07e595d983b8c0526c8f7fb
+                
+                let lenIds := decodeUint(div(posIds, 0x20))
+                let lenAmounts := decodeUint(div(posAmounts, 0x20))
+
+                let idsStart := 0x40
+                let amountsStart := add(mul(0x20, lenIds), 0x60)
+
+                // now start the amounts array, start with the length
+                let totalSize := add(0x80, mul(mul(lenIds, 2), 0x20))
+
+                // two dynamic arrays, store their starts in the first 2 slots
+                mstore(0x00, idsStart) // ids start at 0x40
+                mstore(0x20, amountsStart) // amounts start here; (len) * 0x20 + 0x60 = 3 * 0x20 + 0x60 = 0x120
+                // now store the ids array, start with the length
+                mstore(idsStart, lenIds)
+                mstore(amountsStart, lenAmounts)
+
+                // fill in the id values
+                for { let i := 0 } lt(i, lenIds) { i:= add(i, 1) }
+                {
+                    let ithId := decodeUint(_getArrayElementSlot(posIds, i))
+                    let ithAmount := decodeUint(_getArrayElementSlot(posAmounts, i))
+
+                    mstore(add(add(idsStart, 0x20), mul(i, 0x20)), ithId)
+                    mstore(add(add(amountsStart, 0x20), mul(i, 0x20)), ithAmount)
+                }
+                
+                log4(0x00, totalSize, signatureHash, operator, from, to)
+            }
+
+            function emitApprovalForAll(_owner, operator, approved) {
+                let signatureHash := 0x17307eab39ab6107e8899845ad3d59bd9653f200f220920489ca2b5937696c31
+                mstore(0x00, approved)
+                log3(0x00, 0x20, signatureHash, _owner, operator)
             }
 
             function _mint(account, id, amount, dataOffset) {
@@ -472,6 +526,26 @@ object "ERC1155" {
             if iszero(eq(expected, returnVal)) {
                 revert(0, 0)
             }
+            }
+
+            /// @notice return the chunk index into the calldata where this dynamic array `posArr`'s ith element is stored.
+            /// @notice example: this function returns 4. This means that decodeAsUint(4) returns the integer stored as the 5th word of the calldata (indices start at 0)
+            /// @dev the returned integer `calldataSlotOffset` from this function can be used with decodeAs<X>(calldataSlotOffset) functions
+            function _getArrayElementSlot(posArr, i) -> calldataSlotOffset {
+                // We're asking: how many 32-byte chunks into the calldata does this array's ith element lie
+                // the array itself starts at posArra (starts meaning: that is where the pointer to the length of the array is stored)
+                let startingOffset := div(safeAdd(posArr, 0x20), 0x20)
+                calldataSlotOffset := safeAdd(startingOffset, i)
+            }
+
+            function safeAdd(a, b) -> r {
+                r := add(a, b)
+                if or(lt(r, a), lt(r, b)) { revert(0, 0) }
+            }
+
+            /// @dev returns the zero address
+            function zeroAddress() -> z {
+                z := 0x0000000000000000000000000000000000000000000000000000000000000000
             }
 
         }
