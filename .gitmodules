@@ -16,3 +16,6 @@
 [submodule "Week8-11:Security/solidity-riddles-foundry/lib/openzeppelin-contracts"]
 	path = Week8-11:Security/solidity-riddles-foundry/lib/openzeppelin-contracts
 	url = https://github.com/Openzeppelin/openzeppelin-contracts
+[submodule "Week15-16:GasOptimization/lib/forge-std"]
+	path = Week15-16:GasOptimization/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
