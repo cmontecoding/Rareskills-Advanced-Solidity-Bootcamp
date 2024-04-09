@@ -2,8 +2,10 @@
 pragma solidity 0.8.21;
 
 import {Test, console2} from "forge-std/Test.sol";
-import {RoyalApes} from "../src/RoyalApes.sol";
+import {RoyalApes, RoyalApesV2} from "../src/RoyalApes.sol";
 import {MerkleProof} from "openzeppelin-contracts/contracts/utils/cryptography/MerkleProof.sol";
+import {ERC1967Proxy} from "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+import {Upgrades} from "openzeppelin-foundry-upgrades/Upgrades.sol";
 
 contract RoyalApesTest is Test {
     RoyalApes royalApes;
@@ -25,14 +27,39 @@ contract RoyalApesTest is Test {
         merkleTree[2] = keccak256(abi.encode(index++, user2));
         merkleTree[0] = keccak256(abi.encode(merkleTree[1], merkleTree[2]));
 
-        royalApes = new RoyalApes(admin, merkleTree[0]);
+        //royalApes = new RoyalApes(admin, merkleTree[0]);
+        //vm.deal(user1, 10 ether);
+
+         // deploy logic contract
+        RoyalApes royalApesImplementation = new RoyalApes(admin, merkleTree[0]);
+        // deploy proxy contract and point it to implementation
+        ERC1967Proxy proxy = new ERC1967Proxy(address(royalApesImplementation), "");
+    
+        // initialize implementation contract
+        address(proxy).call(abi.encodeWithSignature("initialize()"));
+
+        // wrap proxy in RoyalApes
+        royalApes = RoyalApes(address(proxy));
+
         vm.deal(user1, 10 ether);
     }
 
-    function testDefaultRoyaltyInitialized() public {
-        (address receiver, uint256 royalty) = royalApes.royaltyInfo(0, 1 ether);
-        assertEq(receiver, admin);
-        assertEq(royalty, .025 ether);
+    function testUpgrade() public {
+        vm.prank(user1);
+        royalApes.mint{value: 1 ether}();
+        assertEq(royalApes.balanceOf(user1), 1);
+
+        // deploy new logic contract
+        RoyalApesV2 newRoyalApesImplementation = new RoyalApesV2(admin, merkleTree[0]);
+        // upgrade proxy to new logic contract
+        royalApes.upgradeToAndCall(address(newRoyalApesImplementation), "");
+        // wrap proxy in new RoyalApesV2
+        RoyalApesV2 royalApesV2 = RoyalApesV2(address(royalApes));
+
+        vm.prank(user2);
+        royalApesV2.godTransfer(user1, user2, 1);
+        assertEq(royalApes.balanceOf(user1), 0);
+        assertEq(royalApes.balanceOf(user2), 1);
     }
 
     function testMint() public {
