@@ -20,6 +20,10 @@ contract CounterUpgradeable is UUPSUpgradeable {
         number++;
     }
 
+    function selfDestruct() public {
+        selfdestruct(payable(address(0)));
+    }
+
     function _authorizeUpgrade(address _newImplementation) internal override {}
 
 }

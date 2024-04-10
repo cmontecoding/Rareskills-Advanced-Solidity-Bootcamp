@@ -47,4 +47,12 @@ contract QuestionsTest is Test {
         uint256 result = delegateCall.delegate(address(counter));
         assertEq(result, 0);
     }
+
+    // If a proxy calls an implementation, and the implementation
+    // self-destructs in the function that gets called, what happens? 
+    function testSelfDestruct() public {
+        counterUpgradeable.selfDestruct();
+        counterUpgradeable.increment();
+        assertEq(counterUpgradeable.number(), 0);
+    }
 }
