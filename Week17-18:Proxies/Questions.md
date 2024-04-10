@@ -1,0 +1,10 @@
+- [ ]  When a contract calls another call via call, delegatecall, or staticcall, how is information passed between them? Where is this data stored? The data is stored in memory.
+- [ ]  If a proxy calls an implementation, and the implementation self-destructs in the function that gets called, what happens? 
+- [ ]  If a proxy calls an empty address or an implementation that was previously self-destructed, what happens?
+- [ ]  If a user calls a proxy makes a delegatecall to A, and A makes a regular call to B, from A's perspective, who is msg.sender? from B's perspective, who is msg.sender? From the proxy's perspective, who is msg.sender?
+- [ ]  If a proxy makes a delegatecall to A, and A does address(this).balance, whose balance is returned, the proxy's or A?
+- [ ]  If a proxy makes a delegatecall to A, and A calls codesize, is codesize the size of the proxy or A?
+- [ ]  If a delegatecall is made to a function that reverts, what does the delegatecall do?
+- [ ]  Under what conditions does the Openzeppelin Proxy.sol overwrite the free memory pointer? Why is it safe to do this?
+- [ ]  If a delegatecall is made to a function that reads from an immutable variable, what will the value be?
+- [ ]  If a delegatecall is made to a contract that makes a delegatecall to another contract, who is msg.sender in the proxy, the first contract, and the second contract?
