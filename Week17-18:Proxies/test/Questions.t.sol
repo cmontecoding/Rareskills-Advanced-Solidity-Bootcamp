@@ -12,6 +12,7 @@ contract QuestionsTest is Test {
     ERC1967Proxy public proxy;
     CounterUpgradeable public counterUpgradeable;
     Counter public counter;
+    DelegateCall public delegateCall;
 
     function setUp() public {
         // address proxy = Upgrades.deployUUPSProxy(
@@ -31,6 +32,7 @@ contract QuestionsTest is Test {
         counterUpgradeable = CounterUpgradeable(address(proxy));
 
         counter = new Counter();
+        delegateCall = new DelegateCall();
     }
 
     function test_Increment() public {
@@ -43,7 +45,6 @@ contract QuestionsTest is Test {
     // delegatecall, or staticcall, how is information
     // passed between them? Where is this data stored? 
     function testInformation() public {
-        DelegateCall delegateCall = new DelegateCall();
         uint256 result = delegateCall.delegate(address(counter));
         assertEq(result, 0);
     }
