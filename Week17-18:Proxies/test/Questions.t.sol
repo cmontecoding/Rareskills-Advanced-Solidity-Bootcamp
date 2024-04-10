@@ -45,7 +45,7 @@ contract QuestionsTest is Test {
     // delegatecall, or staticcall, how is information
     // passed between them? Where is this data stored? 
     function testInformation() public {
-        uint256 result = delegateCall.delegate(address(counter));
+        (uint256 result, ) = delegateCall.delegate(address(counter));
         assertEq(result, 0);
     }
 
@@ -55,5 +55,45 @@ contract QuestionsTest is Test {
         counterUpgradeable.selfDestruct();
         counterUpgradeable.increment();
         assertEq(counterUpgradeable.number(), 0);
+    }
+
+    // If a proxy makes a delegatecall to A, and
+    // A does address(this).balance, whose balance
+    // is returned, the proxy's or A? 
+    function testBalance() public {
+        vm.deal(address(implementation), 5);
+        vm.deal(address(counterUpgradeable), 10);
+
+        uint256 bal = counterUpgradeable.balance();
+        assertEq(bal, 10);
+    }
+
+    // If a proxy makes a delegatecall to A, and
+    // A calls codesize, is codesize the size of the proxy or A? 
+    function testCodesize() public {
+        uint256 proxycs = counterUpgradeable.codesize();
+        uint256 impcs = implementation.codesize();
+        assertTrue(proxycs != impcs);
+    }
+
+    // If a delegatecall is made to a function that reverts,
+    // what does the delegatecall do? 
+    function testRevert() public {
+        counterUpgradeable.revert();
+    }
+
+    // If a delegatecall is made to a function that reads an
+    // immutable variable, where is the variable read from?
+    function testReadImmutable() public {
+        uint256 x = counterUpgradeable.readImmutable();
+        assertEq(x, 2);
+    }
+
+    // If a delegatecall is made to a contract that makes a
+    // delegatecall to another contract, who is msg.sender
+    // in the proxy, the first contract, and the second contract? 
+    function testDelegateCall() public {
+        (uint256 result, address msgsender) = delegateCall.emptyDelegate(address(delegateCall));
+        //assertEq(msgsender, address(this));
     }
 }
