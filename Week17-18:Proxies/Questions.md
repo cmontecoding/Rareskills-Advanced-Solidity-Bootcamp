@@ -1,4 +1,4 @@
-- [ ]  When a contract calls another call via call, delegatecall, or staticcall, how is information passed between them? Where is this data stored? The data is stored in memory.
+- [ ]  When a contract calls another call via call, delegatecall, or staticcall, how is information passed between them? Where is this data stored? Calldata is used to pass the information there and then returndata is used to bring it back. The data is stored in calldata and returndata.
 - [ ]  If a proxy calls an implementation, and the implementation self-destructs in the function that gets called, what happens? Seems like nothing. Maybe its because of my solidity version (0.8.13)
 - [ ]  If a proxy calls an empty address or an implementation that was previously self-destructed, what happens? Nothing?
 - [ ]  If a user calls a proxy makes a delegatecall to A, and A makes a regular call to B, from A's perspective, who is msg.sender? from B's perspective, who is msg.sender? From the proxy's perspective, who is msg.sender? Both the proxy and A have msg.sender as the user. B has msg.sender as A.
@@ -7,4 +7,4 @@
 - [ ]  If a delegatecall is made to a function that reverts, what does the delegatecall do? The delegatecall reverts as well.
 - [ ]  Under what conditions does the Openzeppelin Proxy.sol overwrite the free memory pointer? Why is it safe to do this? It overwrites the solidity scratch pad at memory position 0. It overwrites it in assembly and its safe to do this because the code doesnt return to solidity.
 - [ ]  If a delegatecall is made to a function that reads from an immutable variable, what will the value be? The value of the immutable variable on the implementation.
-- [ ]  If a delegatecall is made to a contract that makes a delegatecall to another contract, who is msg.sender in the proxy, the first contract, and the second contract? Not 100% sure but I think tx.origin is the msg.sender is all three.
+- [ ]  If a delegatecall is made to a contract that makes a delegatecall to another contract, who is msg.sender in the proxy, the first contract, and the second contract? The original msg.sender of the proxy is the msg.sender of all three.
